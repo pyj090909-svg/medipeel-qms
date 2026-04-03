@@ -918,34 +918,48 @@ function openDocLinksForRow(rowIndex) {
 // 첨부파일 → 새 팝업 윈도우
 function openDocLinksWindow(links, pname) {
   const title = (pname ? pname + ' ' : '') + '첨부파일';
+
+  // URL 목록을 JSON으로 직렬화해 팝업 스크립트에 주입
+  const linksJson = JSON.stringify(links.map(l => (l || '').trim()));
+
   const itemsHtml = links.map((l, i) => {
-    const url = (l || '').trim();
+    const url   = (l || '').trim();
     const label = url.length > 60 ? url.slice(0, 57) + '...' : url;
-    return `<a href="${url.replace(/"/g,'&quot;')}" download target="_blank"
-      style="display:flex;align-items:center;gap:10px;padding:12px 16px;
-             background:#f4f7ff;border:1px solid #dbeafe;border-radius:9px;
-             text-decoration:none;color:#1d4ed8;transition:background .15s;"
-      onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#f4f7ff'">
-      <span style="min-width:24px;height:24px;border-radius:50%;background:#2e5fe8;color:#fff;
-                   font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">${i + 1}</span>
-      <span style="font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${url.replace(/"/g,'&quot;')}">${label}</span>
-      <span style="font-size:13px;color:#93c5fd;">↗</span>
-    </a>`;
+    const safeTitle = url.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    const safeLabel = label.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<div class="item" data-idx="${i}"
+      onclick="openLink(${i})"
+      onmouseover="this.style.background='#dbeafe';this.style.borderColor='#93c5fd'"
+      onmouseout="this.style.background='#f4f7ff';this.style.borderColor='#dbeafe'">
+      <span class="num">${i + 1}</span>
+      <span class="lbl" title="${safeTitle}">${safeLabel}</span>
+      <span class="arr">↗</span>
+    </div>`;
   }).join('');
 
   const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
 <title>${title}</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Pretendard','Noto Sans KR',sans-serif;background:#f0f4ff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-  .box{background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(46,95,232,.18);overflow:hidden;width:540px;max-width:100%}
-  .head{background:linear-gradient(135deg,#2e5fe8,#1e40af);padding:18px 22px;display:flex;align-items:center;gap:10px}
+  body{font-family:'Pretendard','Noto Sans KR',sans-serif;background:#f0f4ff;
+       display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  .box{background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(46,95,232,.18);
+       overflow:hidden;width:540px;max-width:100%}
+  .head{background:linear-gradient(135deg,#2e5fe8,#1e40af);padding:18px 22px;
+        display:flex;align-items:center;gap:10px}
   .head-icon{font-size:20px}
-  .head-title{color:#fff;font-size:15px;font-weight:700;flex:1}
+  .head-title{color:#fff;font-size:15px;font-weight:700}
   .head-sub{color:rgba(255,255,255,.75);font-size:11px;margin-top:2px}
   .body{padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+  .item{display:flex;align-items:center;gap:10px;padding:12px 16px;
+        background:#f4f7ff;border:1px solid #dbeafe;border-radius:9px;cursor:pointer;transition:background .15s}
+  .num{min-width:24px;height:24px;border-radius:50%;background:#2e5fe8;color:#fff;
+       font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .lbl{font-size:12px;color:#1d4ed8;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .arr{font-size:13px;color:#93c5fd;flex-shrink:0}
   .foot{padding:12px 20px;text-align:right;border-top:1px solid #e5e7eb}
-  .btn-close{padding:7px 20px;background:#6b7280;color:#fff;border:none;border-radius:7px;font-size:13px;cursor:pointer;border-radius:7px}
+  .btn-close{padding:7px 20px;background:#6b7280;color:#fff;border:none;
+             border-radius:7px;font-size:13px;cursor:pointer}
   .btn-close:hover{background:#4b5563}
 </style></head><body>
 <div class="box">
@@ -953,15 +967,31 @@ function openDocLinksWindow(links, pname) {
     <span class="head-icon">📎</span>
     <div>
       <div class="head-title">첨부파일 ${links.length > 1 ? links.length + '개' : ''}</div>
-      ${pname ? `<div class="head-sub">${pname}</div>` : ''}
+      ${pname ? `<div class="head-sub">${title.replace(/&/g,'&amp;')}</div>` : ''}
     </div>
   </div>
   <div class="body">${itemsHtml}</div>
   <div class="foot"><button class="btn-close" onclick="window.close()">닫기</button></div>
 </div>
+<script>
+var LINKS = ${linksJson};
+function openLink(i) {
+  var url = LINKS[i];
+  if (!url) return;
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+<\/script>
 </body></html>`;
 
-  const w = window.open('', '_blank', 'width=580,height=' + Math.min(120 + links.length * 70, 600) + ',scrollbars=yes,resizable=yes,toolbar=no,menubar=no');
+  const w = window.open('', '_blank',
+    'width=580,height=' + Math.min(140 + links.length * 68, 600) +
+    ',scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no');
   if (!w) { alert('팝업이 차단되었습니다.\n브라우저 팝업 허용 후 다시 시도해 주세요.'); return; }
   setTimeout(function() {
     w.document.open();
