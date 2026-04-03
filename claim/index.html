@@ -894,7 +894,7 @@ function docBadgeHtml(r) {
   if (!links.length) return '';
   const countBadge = links.length > 1 ? `<span class="doc-popup-count">${links.length}</span>` : '';
   // rowIndex만 넘기고 openDocLinksForRow에서 allRows 조회 — 인코딩 문제 없음
-  return `<button class="doc-popup-btn" onclick="openDocLinksForRow(${r._rowIndex})" title="첨부파일 ${links.length}개">🗂️${countBadge}</button>`;
+  return `<button class="doc-popup-btn" onclick="openDocLinksForRow(${r._rowIndex})" title="첨부파일 ${links.length}개">📎${countBadge}</button>`;
 }
 
 function openDocLinksForRow(rowIndex) {
