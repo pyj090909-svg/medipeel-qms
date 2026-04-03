@@ -525,13 +525,14 @@ let yearFilter = String(new Date().getFullYear()); // 당해연도 기본값
 
 window.addEventListener('DOMContentLoaded', () => {
   // ── 로그인 세션 체크: 미인증 시 메인으로 리다이렉트 ──
+  // iframe(BI Hub viewer)으로 열린 경우 → 허브 자체 보안을 신뢰하므로 체크 건너뜀
+  const isInIframe = (window.self !== window.top);
   const qmsUser = sessionStorage.getItem('qms_user');
-  if (!qmsUser) {
-    // GitHub Pages 배포 경로와 로컬 경로 모두 대응
+  if (!isInIframe && !qmsUser) {
     const isGitHubPages = location.hostname.includes('github.io');
     location.replace(isGitHubPages
-      ? '/medipeel-qms/'          // GitHub Pages 루트
-      : '../index.html');         // 로컬 파일 경로
+      ? '/medipeel-qms/'
+      : '../index.html');
     return;
   }
   startClock();
