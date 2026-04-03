@@ -1359,35 +1359,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 </div>
 
 <script>
-// ── 기본 계정 ──
-const ACCOUNTS_VER = 'v3';
-const DEFAULT_ACCOUNTS = [
+// ── 계정 정보 (코드에 직접 고정 — 브라우저 무관 동일 적용) ──
+// 계정 추가/변경은 이 배열을 직접 수정 후 git push
+const ACCOUNTS = [
   { id:'admin',   pw:'admin1234', name:'관리자',    initials:'관', role:'admin' },
   { id:'quality', pw:'quality1!', name:'품질관리팀', initials:'품', role:'user'  },
   { id:'steve',   pw:'steve1!',   name:'Steve',     initials:'S',  role:'user'  },
+  { id:'pyj',     pw:'pyj1234',   name:'박영주',     initials:'박', role:'user'  },
 ];
-const STORE_KEY = 'qms_accounts';
-const VER_KEY   = 'qms_accounts_ver';
 
-// 페이지 로드 시 버전 다르면 즉시 강제 초기화
-(function() {
-  if (localStorage.getItem(VER_KEY) !== ACCOUNTS_VER) {
-    localStorage.removeItem(STORE_KEY);
-    localStorage.setItem(STORE_KEY, JSON.stringify(DEFAULT_ACCOUNTS));
-    localStorage.setItem(VER_KEY, ACCOUNTS_VER);
-  }
-})();
-
-function loadAccounts() {
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return DEFAULT_ACCOUNTS;
-}
+function loadAccounts() { return ACCOUNTS; }
 function saveAccounts(list) {
-  localStorage.setItem(STORE_KEY, JSON.stringify(list));
-  localStorage.setItem(VER_KEY, ACCOUNTS_VER);
+  // 세션 중 UI 변경은 메모리에만 반영 (새로고침 시 코드 원본으로 복원)
+  ACCOUNTS.length = 0;
+  list.forEach(a => ACCOUNTS.push(a));
 }
 function getInitials(name) {
   if (!name) return '?';
