@@ -905,12 +905,12 @@ function openDocLinksForRow(rowIndex) {
   openDocLinksModal(links, r['품명'] || '');
 }
 
-// 새창으로 URL 열기 — 현재 페이지 유지
-function openUrlNewTab(url) {
+// 링크 클릭 → 파일 다운로드
+function downloadFile(url) {
   const a = document.createElement('a');
   a.href = url.trim();
+  a.download = '';
   a.target = '_blank';
-  a.rel = 'noopener noreferrer';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -923,7 +923,7 @@ function openDocLinksModal(links, pname) {
   // 링크 목록 렌더링 — 인덱스로 참조하여 onclick 특수문자 문제 회피
   window._docModalLinks = links;
   document.getElementById('doclinks-body').innerHTML = links.map((l, i) => `
-    <div class="doclink-item" onclick="openUrlNewTab(window._docModalLinks[${i}])" style="cursor:pointer">
+    <div class="doclink-item" onclick="downloadFile(window._docModalLinks[${i}])" style="cursor:pointer">
       <span class="doclink-num">${i + 1}</span>
       <span class="doclink-url" title="${esc((l||'').trim())}">${esc((l||'').trim())}</span>
       <span class="doclink-arrow">↗</span>
