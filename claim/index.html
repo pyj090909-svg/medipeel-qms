@@ -909,12 +909,15 @@ function openDocLinksForRow(rowIndex) {
 function openDocLinksModal(links, pname) {
   document.getElementById('doclinks-title').textContent = `첨부파일 ${links.length > 1 ? links.length + '개' : ''}`;
   document.getElementById('doclinks-sub').textContent   = pname || '';
-  document.getElementById('doclinks-body').innerHTML    = links.map((l, i) => `
-    <a class="doclink-item" href="${esc(l)}" target="_blank" rel="noopener">
+  document.getElementById('doclinks-body').innerHTML    = links.map((l, i) => {
+    const url = (l || '').trim();
+    return `
+    <div class="doclink-item" onclick="window.open('${url.replace(/'/g,"\\'")}','_blank','noopener,noreferrer')" style="cursor:pointer">
       <span class="doclink-num">${i + 1}</span>
-      <span class="doclink-url" title="${esc(l)}">${esc(l)}</span>
+      <span class="doclink-url" title="${esc(url)}">${esc(url)}</span>
       <span class="doclink-arrow">↗</span>
-    </a>`).join('');
+    </div>`;
+  }).join('');
   document.getElementById('doclinks-modal').classList.add('open');
 }
 function closeDocLinksModal() {
