@@ -919,22 +919,18 @@ function openDocLinksForRow(rowIndex) {
 function openDocLinksWindow(links, pname) {
   const title = (pname ? pname + ' ' : '') + '첨부파일';
 
-  // URL 목록을 JSON으로 직렬화해 팝업 스크립트에 주입
-  const linksJson = JSON.stringify(links.map(l => (l || '').trim()));
-
   const itemsHtml = links.map((l, i) => {
-    const url   = (l || '').trim();
-    const label = url.length > 60 ? url.slice(0, 57) + '...' : url;
-    const safeTitle = url.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    const safeLabel = label.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    return `<div class="item" data-idx="${i}"
-      onclick="openLink(${i})"
-      onmouseover="this.style.background='#dbeafe';this.style.borderColor='#93c5fd'"
-      onmouseout="this.style.background='#f4f7ff';this.style.borderColor='#dbeafe'">
+    const url      = (l || '').trim();
+    const label    = url.length > 60 ? url.slice(0, 57) + '...' : url;
+    const safeHref = url.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    const safeTitle= url.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    const safeLabel= label.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    // target="_blank" rel="noopener noreferrer" → 완전히 새 탭, 부모/팝업 영향 없음
+    return `<a class="item" href="${safeHref}" target="_blank" rel="noopener noreferrer">
       <span class="num">${i + 1}</span>
       <span class="lbl" title="${safeTitle}">${safeLabel}</span>
       <span class="arr">↗</span>
-    </div>`;
+    </a>`;
   }).join('');
 
   const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
@@ -952,7 +948,9 @@ function openDocLinksWindow(links, pname) {
   .head-sub{color:rgba(255,255,255,.75);font-size:11px;margin-top:2px}
   .body{padding:18px 20px;display:flex;flex-direction:column;gap:8px}
   .item{display:flex;align-items:center;gap:10px;padding:12px 16px;
-        background:#f4f7ff;border:1px solid #dbeafe;border-radius:9px;cursor:pointer;transition:background .15s}
+        background:#f4f7ff;border:1px solid #dbeafe;border-radius:9px;cursor:pointer;
+        transition:background .15s;text-decoration:none;}
+  .item:hover{background:#dbeafe;border-color:#93c5fd;}
   .num{min-width:24px;height:24px;border-radius:50%;background:#2e5fe8;color:#fff;
        font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .lbl{font-size:12px;color:#1d4ed8;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -973,20 +971,6 @@ function openDocLinksWindow(links, pname) {
   <div class="body">${itemsHtml}</div>
   <div class="foot"><button class="btn-close" onclick="window.close()">닫기</button></div>
 </div>
-<script>
-var LINKS = ${linksJson};
-function openLink(i) {
-  var url = LINKS[i];
-  if (!url) return;
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = '';
-  a.rel = 'noopener noreferrer';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-<\/script>
 </body></html>`;
 
   const w = window.open('', '_blank',
