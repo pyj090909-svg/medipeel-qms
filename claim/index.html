@@ -905,19 +905,29 @@ function openDocLinksForRow(rowIndex) {
   openDocLinksModal(links, r['품명'] || '');
 }
 
+// 새창으로 URL 열기 — 현재 페이지 유지
+function openUrlNewTab(url) {
+  const a = document.createElement('a');
+  a.href = url.trim();
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 // 첨부파일 팝업
 function openDocLinksModal(links, pname) {
   document.getElementById('doclinks-title').textContent = `첨부파일 ${links.length > 1 ? links.length + '개' : ''}`;
   document.getElementById('doclinks-sub').textContent   = pname || '';
-  document.getElementById('doclinks-body').innerHTML    = links.map((l, i) => {
-    const url = (l || '').trim();
-    return `
-    <div class="doclink-item" onclick="window.open('${url.replace(/'/g,"\\'")}','_blank','noopener,noreferrer')" style="cursor:pointer">
+  // 링크 목록 렌더링 — 인덱스로 참조하여 onclick 특수문자 문제 회피
+  window._docModalLinks = links;
+  document.getElementById('doclinks-body').innerHTML = links.map((l, i) => `
+    <div class="doclink-item" onclick="openUrlNewTab(window._docModalLinks[${i}])" style="cursor:pointer">
       <span class="doclink-num">${i + 1}</span>
-      <span class="doclink-url" title="${esc(url)}">${esc(url)}</span>
+      <span class="doclink-url" title="${esc((l||'').trim())}">${esc((l||'').trim())}</span>
       <span class="doclink-arrow">↗</span>
-    </div>`;
-  }).join('');
+    </div>`).join('');
   document.getElementById('doclinks-modal').classList.add('open');
 }
 function closeDocLinksModal() {
