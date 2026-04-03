@@ -1057,12 +1057,33 @@ async function doSave() {
 }
 
 async function doDelete() {
-  if (!confirm('이 클레임을 삭제하시겠습니까?\\n(Google Sheets에서도 삭제됩니다)')) return;
+  // confirm() 은 iframe sandbox 환경에서 차단되므로 커스텀 다이얼로그 사용
+  const confirmed = await new Promise(resolve => {
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9999;display:flex;align-items:center;justify-content:center';
+    ov.innerHTML = \`<div style="background:#fff;border-radius:14px;padding:28px 32px;max-width:320px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.28)">
+      <div style="font-size:32px;margin-bottom:10px">🗑️</div>
+      <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:6px">이 클레임을 삭제할까요?</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:22px">Google Sheets에서도 영구 삭제됩니다.</div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button id="_dc" style="flex:1;padding:9px 0;border:1px solid #d1d5db;background:#f9fafb;border-radius:8px;font-size:13px;cursor:pointer">취소</button>
+        <button id="_dd" style="flex:1;padding:9px 0;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">삭제</button>
+      </div></div>\`;
+    document.body.appendChild(ov);
+    ov.querySelector('#_dd').onclick = () => { document.body.removeChild(ov); resolve(true); };
+    ov.querySelector('#_dc').onclick = () => { document.body.removeChild(ov); resolve(false); };
+  });
+  if (!confirmed) return;
+  const msg = document.getElementById('wmsg');
+  msg.className='msg'; msg.textContent='삭제 중...';
   try {
     await gas({ action:'delete', rowIndex:ROW_IDX });
-    if(window.opener && !window.opener.closed) window.opener.loadData();
-    window.close();
-  } catch(e) { alert('삭제 오류: '+e.message); }
+    msg.className='msg ok'; msg.textContent='✓ 삭제 완료';
+    setTimeout(()=>{
+      if(window.opener && !window.opener.closed) window.opener.loadData();
+      window.close();
+    }, 600);
+  } catch(e) { msg.className='msg err'; msg.textContent='❌ 삭제 오류: '+e.message; }
 }
 <\/script>
 </body></html>`;
