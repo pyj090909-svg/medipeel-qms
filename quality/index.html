@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>품질관리 현황판 - 일반지표 | MEDIPEEL</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',Arial,sans-serif; font-size:13px; background:#f0f3f9; color:#1a2035; line-height:1.5; }
+
+/* ── Security Bar ── */
+.sec-bar { width:100%; background:#0a1230; color:rgba(255,255,255,.70); font-size:11px; font-weight:500; display:flex; align-items:center; gap:14px; padding:6px 20px; }
+.sec-bar strong { color:#8ab4ff; }
+.sec-bar .sep { width:1px; height:11px; background:rgba(255,255,255,.15); }
+.sec-right { margin-left:auto; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.sec-collect { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:rgba(255,255,255,.70); }
+.sec-collect-dot { width:6px; height:6px; border-radius:50%; background:#0ea97e; flex-shrink:0; animation:sec-blink 1.2s ease-in-out infinite; }
+@keyframes sec-blink { 0%,100%{opacity:1} 50%{opacity:.12} }
+
+/* ── Header ── */
+.header { background:linear-gradient(135deg,#0f1c45 0%,#1e3a82 60%,#1a306e 100%); color:#fff; padding:16px 28px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(15,28,69,.30); }
+.header-left { display:flex; align-items:center; gap:12px; }
+.back-btn { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:rgba(255,255,255,.60); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:6px; padding:4px 10px; text-decoration:none; transition:background .15s; white-space:nowrap; }
+.back-btn:hover { background:rgba(255,255,255,.14); color:#fff; }
+.header-tag { font-size:10px; font-weight:700; color:rgba(255,255,255,.45); letter-spacing:.10em; text-transform:uppercase; margin-bottom:3px; }
+.header-title { font-size:17px; font-weight:700; letter-spacing:-.3px; }
+.header-right { text-align:right; display:flex; align-items:center; gap:12px; }
+.header-sub { font-size:11px; color:rgba(255,255,255,.45); }
+.header-time { font-size:12px; color:rgba(255,255,255,.80); font-variant-numeric:tabular-nums; }
+.sync-status { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:rgba(255,255,255,.55); }
+.sync-dot { width:6px; height:6px; border-radius:50%; background:#0ea97e; animation:pulse 2s infinite; }
+.sync-dot.syncing { background:#f0b030; animation:spin-dot .8s linear infinite; }
+.sync-dot.err { background:#e03c3c; animation:none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+@keyframes spin-dot { 0%{opacity:1} 50%{opacity:.3} 100%{opacity:1} }
+.header-logo { height:30px; width:auto; object-fit:contain; filter:brightness(0) invert(1); opacity:.92; }
+
+.btn-header { padding:6px 14px; border-radius:7px; font-size:11px; font-weight:600; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08); color:rgba(255,255,255,.80); cursor:pointer; display:flex; align-items:center; gap:5px; transition:all .15s; }
+.btn-header:hover { background:rgba(255,255,255,.16); color:#fff; }
+.btn-header.save { background:rgba(14,169,126,.25); border-color:rgba(14,169,126,.4); color:#6ee7b7; display:none; }
+.btn-header.save.visible { display:flex; }
+.btn-header.primary { background:rgba(46,95,232,.3); border-color:rgba(46,95,232,.4); color:#93b5ff; }
+
+/* ── Main ── */
+.main { padding:18px 24px 40px; max-width:1800px; margin:0 auto; }
+
+/* ── Month Tabs ── */
+.month-tabs { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+.month-tab { padding:6px 18px; border:1px solid #d0d5e8; border-radius:7px; background:#fff; font-size:12px; font-weight:600; color:#4a5470; cursor:pointer; transition:all .15s; }
+.month-tab:hover { background:#f0f4ff; border-color:#b0c4f8; color:#2e5fe8; }
+.month-tab.active { background:#2e5fe8; color:#fff; border-color:#2e5fe8; box-shadow:0 2px 6px rgba(46,95,232,.25); }
+
+/* ── KPI Cards ── */
+.kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+.kpi-card { background:#fff; border:1px solid #e4e8f2; border-radius:12px; padding:15px 18px; position:relative; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); transition:box-shadow .15s, border-color .15s, transform .10s; }
+.kpi-card:hover { box-shadow:0 4px 14px rgba(46,95,232,.14); border-color:#b0c4f8; transform:translateY(-1px); }
+.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:12px 12px 0 0; }
+.kpi-card.c1::before { background:linear-gradient(90deg,#2e5fe8,#7c5ce8); }
+.kpi-card.c2::before { background:linear-gradient(90deg,#0ea97e,#0bc4a8); }
+.kpi-card.c3::before { background:linear-gradient(90deg,#e03c3c,#f07070); }
+.kpi-card.c4::before { background:linear-gradient(90deg,#6366f1,#a78bfa); }
+.kpi-label { font-size:10px; font-weight:600; color:#8a93b0; letter-spacing:.05em; text-transform:uppercase; margin-bottom:7px; }
+.kpi-value { font-size:26px; font-weight:700; color:#1a2035; letter-spacing:-.02em; line-height:1; }
+.kpi-value .unit { font-size:12px; font-weight:400; color:#8a93b0; margin-left:2px; }
+.kpi-sub { font-size:11px; color:#8a93b0; margin-top:4px; }
+.kpi-trend { display:inline-flex; align-items:center; gap:3px; font-size:11px; font-weight:600; margin-top:6px; padding:2px 8px; border-radius:10px; }
+.kpi-trend.up { background:#dcfce7; color:#15803d; }
+.kpi-trend.down { background:#fee2e2; color:#b91c1c; }
+.kpi-trend.neutral { background:#f3f4f6; color:#8a93b0; }
+
+/* ── Charts ── */
+.charts-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:18px; }
+.chart-card { background:#fff; border:1px solid #e4e8f2; border-radius:12px; padding:16px 18px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.chart-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.chart-title { font-size:13px; font-weight:700; color:#1a2035; }
+.chart-container { position:relative; height:240px; }
+
+/* ── Tables ── */
+.table-card { background:#fff; border:1px solid #e4e8f2; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); margin-bottom:16px; }
+.table-card-header { padding:14px 18px; border-bottom:1px solid #eef0f5; display:flex; justify-content:space-between; align-items:center; }
+.table-card-title { font-size:14px; font-weight:700; color:#1a2035; display:flex; align-items:center; gap:8px; }
+.table-card-title .dot { width:10px; height:10px; border-radius:50%; }
+.table-card-hint { font-size:10px; color:#b0b8cc; }
+.table-scroll { overflow-x:auto; }
+.table-scroll::-webkit-scrollbar { height:5px; }
+.table-scroll::-webkit-scrollbar-track { background:#f4f6fb; }
+.table-scroll::-webkit-scrollbar-thumb { background:#d0d5e8; border-radius:3px; }
+
+table { width:100%; border-collapse:collapse; font-size:12px; }
+thead th { background:#0f1c45; color:rgba(255,255,255,.90); padding:9px 12px; font-size:11px; font-weight:600; text-align:center; white-space:nowrap; letter-spacing:.03em; }
+thead th.th-month { background:#1a306e; color:#93b5ff; font-size:12px; font-weight:700; }
+tbody tr { border-bottom:1px solid #f0f2f8; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:#f4f7ff; }
+tbody td { padding:8px 12px; text-align:center; color:#2a3355; font-size:12px; }
+td.row-label { text-align:left; font-weight:600; color:#1a2035; white-space:nowrap; min-width:140px; position:sticky; left:0; background:#fff; z-index:1; }
+tr:hover td.row-label { background:#f4f7ff; }
+td.total-cell { font-weight:800; color:#1a2035; background:#f8f9ff; }
+td.editable { cursor:text; position:relative; transition:all .12s; }
+td.editable:hover { background:#eef2ff; outline:1px solid #b0c4f8; }
+td.editable:focus-within { background:#dbeafe; outline:2px solid #2e5fe8; }
+td.editable input { background:transparent; border:none; color:#1a2035; font-size:12px; font-weight:600; width:100%; text-align:center; outline:none; font-family:inherit; }
+td.changed { background:#fef9c3 !important; }
+td.changed::after { content:''; position:absolute; top:2px; right:2px; width:5px; height:5px; border-radius:50%; background:#d98b10; }
+
+/* ── Modal ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(4px); z-index:500; display:none; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff; border-radius:16px; width:900px; max-width:96vw; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.22); overflow:hidden; }
+.modal-head { padding:16px 20px 12px; border-bottom:1px solid #eef0f5; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.modal-head-icon { width:34px; height:34px; border-radius:10px; background:rgba(46,95,232,.10); display:flex; align-items:center; justify-content:center; font-size:15px; }
+.modal-head-title { font-size:14px; font-weight:700; }
+.modal-head-sub { font-size:11px; color:#8a93b0; margin-top:1px; }
+.modal-close { margin-left:auto; width:27px; height:27px; border-radius:7px; background:#f0f2f8; border:none; cursor:pointer; font-size:13px; color:#4a5470; display:flex; align-items:center; justify-content:center; }
+.modal-close:hover { background:#e4e8f2; }
+.modal-body { flex:1; overflow-y:auto; padding:16px 20px; }
+.modal-foot { padding:12px 20px; border-top:1px solid #eef0f5; display:flex; justify-content:flex-end; gap:8px; flex-shrink:0; }
+.btn-cancel { padding:8px 16px; background:#f0f2f8; border:none; border-radius:8px; font-size:12px; font-family:inherit; color:#4a5470; cursor:pointer; }
+.btn-cancel:hover { background:#e4e8f2; }
+.btn-save-modal { padding:8px 20px; background:linear-gradient(135deg,#2e5fe8,#1a4acc); border:none; border-radius:8px; font-size:12px; font-weight:700; font-family:inherit; color:#fff; cursor:pointer; }
+.btn-save-modal:hover { opacity:.88; }
+
+/* ── Modal Table (시트 템플릿 형식) ── */
+.modal-table-wrap { border:1px solid #e4e8f2; border-radius:10px; overflow-x:auto; margin-bottom:16px; }
+.modal-table { width:100%; border-collapse:collapse; font-size:12px; }
+.modal-table thead th { background:#0f1c45; color:rgba(255,255,255,.90); padding:8px 10px; font-size:11px; font-weight:600; text-align:center; white-space:nowrap; }
+.modal-table thead th.th-cat { background:#1a306e; color:#93b5ff; font-size:12px; font-weight:700; text-align:left; padding-left:14px; }
+.modal-table thead th.th-week { min-width:72px; }
+.modal-table tbody td { padding:6px 8px; border-bottom:1px solid #f0f2f8; text-align:center; vertical-align:middle; }
+.modal-table tbody tr:last-child td { border-bottom:none; }
+.modal-table tbody tr:hover { background:#f4f7ff; }
+.modal-table td.td-cat { font-size:10px; font-weight:600; color:#8a93b0; white-space:nowrap; text-align:center; background:#f8f9ff; }
+.modal-table td.td-item { text-align:left; font-weight:600; color:#1a2035; white-space:nowrap; padding-left:12px; min-width:130px; }
+.modal-table td input { width:100%; padding:5px 6px; border:1px solid #e4e8f2; border-radius:6px; font-size:12px; font-family:inherit; color:#1a2035; text-align:center; outline:none; background:#fff; transition:border-color .15s, background .15s; }
+.modal-table td input:focus { border-color:#2e5fe8; background:#eef2ff; }
+.modal-table td input.input-changed { border-color:#d98b10; background:#fefce8; }
+.modal-table td.td-total { font-weight:800; color:#1a2035; background:#f0f4ff; font-size:12px; }
+.modal-month-tabs { display:flex; gap:6px; margin-bottom:14px; }
+.modal-month-tab { padding:5px 14px; border:1px solid #d0d5e8; border-radius:6px; background:#fff; font-size:12px; font-weight:600; color:#4a5470; cursor:pointer; transition:all .15s; }
+.modal-month-tab:hover { background:#f0f4ff; border-color:#b0c4f8; color:#2e5fe8; }
+.modal-month-tab.active { background:#2e5fe8; color:#fff; border-color:#2e5fe8; }
+
+/* ── Toast ── */
+.toast-msg { position:fixed; bottom:30px; right:30px; background:#1a2035; color:#fff; padding:11px 18px; border-radius:9px; font-size:12px; font-weight:500; opacity:0; transform:translateY(10px); transition:all .25s; pointer-events:none; z-index:9999; }
+.toast-msg.show { opacity:1; transform:translateY(0); }
+.toast-msg.ok { background:#0ea97e; }
+.toast-msg.err { background:#e03c3c; }
+
+/* ── Loading ── */
+.loading-overlay { position:fixed; inset:0; background:rgba(240,243,249,.95); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:999; transition:opacity .4s; }
+.loading-overlay.hidden { opacity:0; pointer-events:none; }
+.loading-spinner { width:36px; height:36px; border:3px solid #e4e8f2; border-top-color:#2e5fe8; border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-text { margin-top:12px; font-size:12px; color:#8a93b0; }
+
+/* ── Footer ── */
+.sec-footer { background:#0a1230; color:rgba(255,255,255,.35); font-size:11px; text-align:center; padding:12px 20px; line-height:1.7; margin-top:20px; }
+.sec-footer strong { color:rgba(255,255,255,.60); }
+
+/* ── Responsive ── */
+@media (max-width:1200px) { .kpi-grid { grid-template-columns:repeat(2,1fr); } .charts-grid { grid-template-columns:1fr; } }
+@media (max-width:768px) { .main { padding:12px 14px 30px; } .kpi-grid { grid-template-columns:1fr; } .header { padding:12px 16px; } }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Google Sheets 데이터를 불러오는 중...</div>
+</div>
+
+<!-- Security Bar -->
+<div class="sec-bar">
+    <strong>MEDIPEEL</strong> <span class="sep"></span> 품질경영시스템 (QMS)
+    <div class="sec-right">
+        <span class="sec-collect"><span class="sec-collect-dot"></span> Google Sheets 실시간 연동</span>
+    </div>
+</div>
+
+<!-- Header -->
+<header class="header">
+    <div class="header-left">
+        <a class="back-btn" href="../7. 품질관리현황판/index.html">&larr; 대시보드</a>
+        <div>
+            <div class="header-tag">DB-QMS01 &middot; 일반지표</div>
+            <div class="header-title">품질관리 현황판</div>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="sync-status" id="syncStatus">
+            <span class="sync-dot" id="syncDot"></span>
+            <span id="syncText">실시간 연동중</span>
+        </div>
+        <span id="refreshTimer" style="font-size:11px;color:rgba(255,255,255,.40)"></span>
+        <button class="btn-header save" id="btnSave" onclick="saveChanges()">&#x1F4BE; 변경사항 저장</button>
+        <button class="btn-header" onclick="openInputModal()">+ 데이터 입력</button>
+        <button class="btn-header primary" onclick="refreshData()">&#x21BB; 새로고침</button>
+        <div style="text-align:right">
+            <div class="header-time" id="headerTime"></div>
+            <div class="header-sub" id="headerSub"></div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="main">
+    <!-- Month Tabs -->
+    <div class="month-tabs" id="monthTabs">
+        <div class="month-tab" data-month="all" onclick="switchView('all')">전체 현황</div>
+        <div class="month-tab active" data-month="current" onclick="switchView('current')">이번 달</div>
+        <div class="month-tab" data-month="1" onclick="switchView('1')">1월</div>
+        <div class="month-tab" data-month="2" onclick="switchView('2')">2월</div>
+        <div class="month-tab" data-month="3" onclick="switchView('3')">3월</div>
+        <div class="month-tab" data-month="4" onclick="switchView('4')">4월</div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-header"><span class="chart-title">월별 문안검토(QC) 추이</span></div>
+            <div class="chart-container"><canvas id="chartQC"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header"><span class="chart-title">월별 생산 관리품 QC 현황</span></div>
+            <div class="chart-container"><canvas id="chartProduction"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header"><span class="chart-title">수출서류 대응 현황</span></div>
+            <div class="chart-container"><canvas id="chartExport"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header"><span class="chart-title">판정 비율 (적합 / 조건부 / 부적합)</span></div>
+            <div class="chart-container"><canvas id="chartJudgment"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Data Tables -->
+    <div id="tablesContainer"></div>
+</div>
+
+<!-- Input Modal -->
+<div class="modal-overlay" id="inputModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <div class="modal-head-icon">&#x1F4DD;</div>
+            <div>
+                <div class="modal-head-title" id="modalTitle">주간 데이터 입력</div>
+                <div class="modal-head-sub">구글 시트 양식과 동일한 형식으로 입력하세요</div>
+            </div>
+            <button class="modal-close" onclick="closeInputModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-month-tabs" id="modalMonthTabs"></div>
+            <div id="modalContent"></div>
+        </div>
+        <div class="modal-foot">
+            <span id="modalChangeCount" style="font-size:11px;color:#8a93b0;margin-right:auto"></span>
+            <button class="btn-cancel" onclick="closeInputModal()">취소</button>
+            <button class="btn-save-modal" onclick="submitModalData()">적용</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-msg" id="toast"></div>
+
+<!-- Footer -->
+<div class="sec-footer">
+    <strong>MEDIPEEL Quality Management System</strong><br>
+    본 현황판은 Google Sheets 실시간 연동으로 운영됩니다. &middot; DB-QMS01-클레임현황 시트3 기준
+</div>
+
+<script>
+// =========================================
+// Configuration
+// =========================================
+const SHEET_ID = '1Pv8mcM80TuVeY_mJa1Ivwr_BCpHaC--EedR8auib-aw';
+const GID = '212454608';
+const FETCH_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+const AUTO_REFRESH = 60000;
+
+// =========================================
+// State
+// =========================================
+let rawData = null;
+let parsedData = null;
+let currentView = 'current';
+let pendingChanges = {};
+let lastRefresh = null;
+let charts = {};
+
+// =========================================
+// Data Row Mapping (gviz 0-indexed, headers auto-skipped)
+// =========================================
+const CATEGORIES = [
+    {
+        id: 'qc_review', name: '문안검토 (QC)', color: '#2e5fe8',
+        items: [
+            { key: 'total', label: '총 건수', row: 0 },
+            { key: 'detail', label: '상세페이지', row: 1 },
+            { key: 'package', label: '패키지', row: 2 },
+            { key: 'leaflet', label: '리플렛', row: 3 },
+            { key: 'digital', label: '디지털 컨텐츠', row: 4 }
+        ]
+    },
+    {
+        id: 'production_qc', name: '생산 관리품 QC', color: '#0ea97e',
+        items: [
+            { key: 'lot', label: '로트 건수 / (SKU)', row: 5 },
+            { key: 'pass', label: '판정 - 적합', row: 6 },
+            { key: 'conditional', label: '판정 - 조건부적합', row: 7 },
+            { key: 'fail', label: '판정 - 부적합', row: 8 }
+        ]
+    },
+    {
+        id: 'export_docs', name: '수출서류대응', color: '#6366f1',
+        items: [
+            { key: 'total', label: '총 건수', row: 9 },
+            { key: 'coa', label: 'COA (시험성적서)', row: 10 },
+            { key: 'msds', label: 'MSDS', row: 11 },
+            { key: 'ingredients', label: '성분표', row: 12 },
+            { key: 'other', label: '이외 수출서류', row: 13 }
+        ]
+    }
+];
+
+// Column mapping (gviz col index)
+// Col 0=구분, 1=항목, 2=1월계
+// 3~6=2월1~4주, 7=2월소계, 8=2월계
+// 9~12=3월1~4주, 13=3월계
+// 14~17=4월1~4주, 18=4월5주, 19=4월계
+const MONTHS = {
+    '1': { totalCol: 2, weeks: [], label: '1월' },
+    '2': { totalCol: 8, weeks: [3,4,5,6], subtotalCol: 7, label: '2월' },
+    '3': { totalCol: 13, weeks: [9,10,11,12], label: '3월' },
+    '4': { totalCol: 19, weeks: [14,15,16,17,18], label: '4월' }
+};
+
+// =========================================
+// Fetch from Google Sheets
+// =========================================
+async function fetchSheetData() {
+    setSyncStatus('syncing');
+    try {
+        const res = await fetch(FETCH_URL);
+        const text = await res.text();
+        const m = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);?$/);
+        if (!m) throw new Error('Invalid response');
+        const json = JSON.parse(m[1]);
+        rawData = json.table;
+        parsedData = parseSheetData(rawData);
+        lastRefresh = new Date();
+        setSyncStatus('ok');
+        updateRefreshTimer();
+        return parsedData;
+    } catch (e) {
+        console.error('Fetch error:', e);
+        setSyncStatus('err');
+        showToast('데이터 로딩 실패. 시트 공유 설정을 확인하세요.', 'err');
+        if (!parsedData) parsedData = getFallbackData();
+        return parsedData;
+    }
+}
+
+function parseSheetData(table) {
+    const data = {};
+    const rows = table.rows;
+    for (let i = 0; i < rows.length; i++) {
+        const cells = rows[i].c;
+        const rowData = [];
+        for (let j = 0; j < (cells ? cells.length : 0); j++) {
+            const c = cells[j];
+            rowData.push(c && c.v != null ? (c.f || String(c.v)) : '');
+        }
+        data[i] = rowData;
+    }
+    return data;
+}
+
+function getCellValue(row, col) {
+    const ck = `${row}_${col}`;
+    if (pendingChanges[ck] !== undefined) return parseFloat(String(pendingChanges[ck]).replace(/[^0-9.\-]/g,'')) || 0;
+    if (!parsedData || !parsedData[row]) return 0;
+    const v = parsedData[row][col];
+    if (!v || v === '-') return 0;
+    return parseFloat(String(v).replace(/[^0-9.\-]/g,'')) || 0;
+}
+
+function getCellRaw(row, col) {
+    const ck = `${row}_${col}`;
+    if (pendingChanges[ck] !== undefined) return String(pendingChanges[ck]);
+    if (!parsedData || !parsedData[row]) return '';
+    return parsedData[row][col] || '';
+}
+
+function getMonthTotal(catId, itemKey, month) {
+    const cat = CATEGORIES.find(c => c.id === catId);
+    const item = cat.items.find(i => i.key === itemKey);
+    return getCellValue(item.row, MONTHS[month].totalCol);
+}
+
+function getFallbackData() {
+    return {
+        0: ['문안검토 (QC)','총 건수','64','2','22','2','0','31','34','4','11','0','0','15','0','0','0','0','0','15'],
+        1: ['문안검토 (QC)','상세페이지','9','5','3','1','0','9','10','0','2','','','2','','','','','','2'],
+        2: ['문안검토 (QC)','패키지','55','2','19','0','0','21','24','4','9','','','13','','','','','','13'],
+        3: ['문안검토 (QC)','리플렛','','0','0','0','0','0','','0','0','','','0','','','','','','0'],
+        4: ['문안검토 (QC)','디지털 컨텐츠','','0','0','1','0','1','','0','0','','','0','','','','','','0'],
+        5: ['생산 관리품 QC','로트 건수 / (sku)','128 / 70sku','23 / 18sku','29 / 18sku','24 / 18sku','91 / 18sku','167 / 72sku','167 / 109sku','93 / 26sku','22 / 19sku','29 / 24sku','48 / 32sku','192 / 101sku','93 / 26sku','22 / 19sku','29 / 24sku','48 / 32sku','','192 / 101sku'],
+        6: ['생산 관리품 QC','판정 - 적합 건수','125','23','29','24','91','167','167','93','22','29','46','190','93','22','29','46','','190'],
+        7: ['생산 관리품 QC','판정 - 조건부적합','3','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','0'],
+        8: ['생산 관리품 QC','판정 - 부적합','0','0','0','0','0','0','0','0','0','0','2','2','0','0','0','2','','2'],
+        9: ['수출서류대응','총 건수','343','2','119','0','19','140','140','53','43','29','10','135','53','43','29','10','0','135'],
+        10:['수출서류대응','COA (시험성적서)','56','2','17','0','1','20','20','32','6','9','3','50','32','6','9','3','','50'],
+        11:['수출서류대응','MSDS','28','0','0','0','3','3','3','1','37','13','5','56','1','37','13','5','','56'],
+        12:['수출서류대응','성분표','28','0','17','0','10','27','27','11','0','2','2','15','11','0','2','2','','15'],
+        13:['수출서류대응','이외 수출서류','231','0','85','0','5','90','90','9','0','5','0','14','9','0','5','0','','14']
+    };
+}
+
+// =========================================
+// UI Rendering
+// =========================================
+function renderAll() {
+    renderKPIs();
+    renderCharts();
+    renderTables();
+    updateHeaderTime();
+}
+
+function getCurrentMonth() {
+    if (currentView === 'current') { const m = String(new Date().getMonth()+1); return MONTHS[m] ? m : '4'; }
+    if (currentView === 'all') return '4';
+    return currentView;
+}
+
+function renderKPIs() {
+    const m = getCurrentMonth();
+    const pm = String(Math.max(1, parseInt(m)-1));
+    const ml = MONTHS[m].label;
+
+    const qc = getMonthTotal('qc_review','total',m);
+    const qcP = getMonthTotal('qc_review','total',pm);
+    const prod = getMonthTotal('production_qc','pass',m);
+    const prodP = getMonthTotal('production_qc','pass',pm);
+    const fail = getMonthTotal('production_qc','fail',m) + getMonthTotal('production_qc','conditional',m);
+    const failP = getMonthTotal('production_qc','fail',pm) + getMonthTotal('production_qc','conditional',pm);
+    const exp = getMonthTotal('export_docs','total',m);
+    const expP = getMonthTotal('export_docs','total',pm);
+    const rate = prod > 0 ? ((prod/(prod+fail))*100).toFixed(1) : '0.0';
+
+    document.getElementById('kpiGrid').innerHTML = `
+        <div class="kpi-card c1">
+            <div class="kpi-label">문안검토 (QC)</div>
+            <div class="kpi-value">${qc}<span class="unit">건</span></div>
+            <div class="kpi-sub">${ml} 누적</div>
+            ${trend(qc,qcP)}
+        </div>
+        <div class="kpi-card c2">
+            <div class="kpi-label">생산관리품 적합</div>
+            <div class="kpi-value">${prod}<span class="unit">건</span></div>
+            <div class="kpi-sub">적합률 ${rate}%</div>
+            ${trend(prod,prodP)}
+        </div>
+        <div class="kpi-card c3">
+            <div class="kpi-label">부적합 / 조건부</div>
+            <div class="kpi-value">${fail}<span class="unit">건</span></div>
+            <div class="kpi-sub">${ml} 기준</div>
+            ${trend(fail,failP,true)}
+        </div>
+        <div class="kpi-card c4">
+            <div class="kpi-label">수출서류 대응</div>
+            <div class="kpi-value">${exp}<span class="unit">건</span></div>
+            <div class="kpi-sub">${ml} 누적</div>
+            ${trend(exp,expP)}
+        </div>`;
+}
+
+function trend(cur,prev,inv=false) {
+    if (!prev) return '<div class="kpi-trend neutral">- 이전 데이터 없음</div>';
+    const d = cur-prev, p = ((d/prev)*100).toFixed(1);
+    let cls = d>0 ? 'up' : 'down';
+    if (inv) cls = d>0 ? 'down' : 'up';
+    return `<div class="kpi-trend ${cls}">${d>0?'&#9650;':'&#9660;'} ${Math.abs(p)}% 전월대비</div>`;
+}
+
+// =========================================
+// Charts
+// =========================================
+const CHART_COLORS = { blue:'#2e5fe8', green:'#0ea97e', red:'#e03c3c', amber:'#d98b10', purple:'#6366f1', cyan:'#06b6d4', gray:'#8a93b0' };
+
+function chartOpts(stacked=false) {
+    return {
+        responsive:true, maintainAspectRatio:false,
+        interaction:{ intersect:false, mode:'index' },
+        plugins: {
+            legend: { position:'top', labels:{ color:'#8a93b0', font:{size:11}, padding:10, usePointStyle:true } },
+            tooltip: { backgroundColor:'#1a2035', titleColor:'#fff', bodyColor:'#b0b8cc', borderColor:'#334155', borderWidth:1, padding:8, cornerRadius:8 }
+        },
+        scales: {
+            x:{ grid:{color:'#eef0f5'}, ticks:{color:'#8a93b0',font:{size:11}}, stacked },
+            y:{ grid:{color:'#eef0f5'}, ticks:{color:'#8a93b0',font:{size:11}}, beginAtZero:true, stacked }
+        }
+    };
+}
+
+function renderCharts() {
+    // QC trend
+    if (charts.qc) charts.qc.destroy();
+    charts.qc = new Chart(document.getElementById('chartQC'), {
+        type:'line',
+        data: {
+            labels:['1월','2월','3월','4월'],
+            datasets:[
+                { label:'총 건수', data:['1','2','3','4'].map(m=>getMonthTotal('qc_review','total',m)), backgroundColor:'rgba(46,95,232,.12)', borderColor:CHART_COLORS.blue, borderWidth:2, fill:true, tension:.4, pointBackgroundColor:CHART_COLORS.blue },
+                { label:'패키지', data:['1','2','3','4'].map(m=>getMonthTotal('qc_review','package',m)), borderColor:CHART_COLORS.cyan, borderWidth:2, borderDash:[5,5], tension:.4, pointBackgroundColor:CHART_COLORS.cyan },
+                { label:'상세페이지', data:['1','2','3','4'].map(m=>getMonthTotal('qc_review','detail',m)), borderColor:CHART_COLORS.purple, borderWidth:2, borderDash:[5,5], tension:.4, pointBackgroundColor:CHART_COLORS.purple }
+            ]
+        },
+        options: chartOpts()
+    });
+
+    // Production stacked bar
+    if (charts.prod) charts.prod.destroy();
+    charts.prod = new Chart(document.getElementById('chartProduction'), {
+        type:'bar',
+        data: {
+            labels:['1월','2월','3월','4월'],
+            datasets:[
+                { label:'적합', data:['1','2','3','4'].map(m=>getMonthTotal('production_qc','pass',m)), backgroundColor:'rgba(14,169,126,.7)', borderRadius:4 },
+                { label:'조건부적합', data:['1','2','3','4'].map(m=>getMonthTotal('production_qc','conditional',m)), backgroundColor:'rgba(217,139,16,.7)', borderRadius:4 },
+                { label:'부적합', data:['1','2','3','4'].map(m=>getMonthTotal('production_qc','fail',m)), backgroundColor:'rgba(224,60,60,.7)', borderRadius:4 }
+            ]
+        },
+        options: chartOpts(true)
+    });
+
+    // Export stacked bar
+    if (charts.exp) charts.exp.destroy();
+    charts.exp = new Chart(document.getElementById('chartExport'), {
+        type:'bar',
+        data: {
+            labels:['1월','2월','3월','4월'],
+            datasets:[
+                { label:'COA', data:['1','2','3','4'].map(m=>getMonthTotal('export_docs','coa',m)), backgroundColor:'rgba(99,102,241,.7)', borderRadius:4 },
+                { label:'MSDS', data:['1','2','3','4'].map(m=>getMonthTotal('export_docs','msds',m)), backgroundColor:'rgba(6,182,212,.7)', borderRadius:4 },
+                { label:'성분표', data:['1','2','3','4'].map(m=>getMonthTotal('export_docs','ingredients',m)), backgroundColor:'rgba(217,139,16,.7)', borderRadius:4 },
+                { label:'이외', data:['1','2','3','4'].map(m=>getMonthTotal('export_docs','other',m)), backgroundColor:'rgba(138,147,176,.4)', borderRadius:4 }
+            ]
+        },
+        options: chartOpts(true)
+    });
+
+    // Judgment donut
+    if (charts.judge) charts.judge.destroy();
+    const cm = getCurrentMonth();
+    const pass=getMonthTotal('production_qc','pass',cm), cond=getMonthTotal('production_qc','conditional',cm), fl=getMonthTotal('production_qc','fail',cm);
+    charts.judge = new Chart(document.getElementById('chartJudgment'), {
+        type:'doughnut',
+        data: {
+            labels:['적합','조건부적합','부적합'],
+            datasets:[{ data:[pass,cond,fl], backgroundColor:['rgba(14,169,126,.8)','rgba(217,139,16,.8)','rgba(224,60,60,.8)'], borderWidth:0 }]
+        },
+        options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{ position:'bottom', labels:{ color:'#8a93b0', font:{size:11}, padding:14 } } } }
+    });
+}
+
+// =========================================
+// Tables
+// =========================================
+function renderTables() {
+    const container = document.getElementById('tablesContainer');
+    container.innerHTML = CATEGORIES.map(cat => buildTable(cat)).join('');
+}
+
+function buildTable(cat) {
+    const months = currentView==='all' ? ['1','2','3','4'] : currentView==='current' ? [getCurrentMonth()] : [currentView];
+
+    let h1 = '<th rowspan="2" style="min-width:140px;text-align:left">항목</th>';
+    let h2 = '';
+    for (const m of months) {
+        const info = MONTHS[m];
+        if (info.weeks.length) {
+            h1 += `<th class="th-month" colspan="${info.weeks.length+1}">${info.label}</th>`;
+            info.weeks.forEach((_,i) => { h2 += `<th>${i+1}주</th>`; });
+            h2 += '<th style="background:#162050;color:#93b5ff">계</th>';
+        } else {
+            h1 += `<th class="th-month">${info.label}</th>`;
+            h2 += '<th style="background:#162050;color:#93b5ff">계</th>';
+        }
+    }
+
+    let body = '';
+    for (const item of cat.items) {
+        body += '<tr>';
+        body += `<td class="row-label">${item.label}</td>`;
+        for (const m of months) {
+            const info = MONTHS[m];
+            for (const wc of info.weeks) {
+                const v = getCellRaw(item.row, wc);
+                const changed = pendingChanges[`${item.row}_${wc}`] !== undefined;
+                body += `<td class="editable${changed?' changed':''}" data-r="${item.row}" data-c="${wc}"><input type="text" value="${v}" onfocus="this.select()" onchange="cellEdit(${item.row},${wc},this.value)" onkeydown="cellKey(event,this)"></td>`;
+            }
+            body += `<td class="total-cell">${getCellRaw(item.row, info.totalCol) || 0}</td>`;
+        }
+        body += '</tr>';
+    }
+
+    return `<div class="table-card">
+        <div class="table-card-header">
+            <div class="table-card-title"><span class="dot" style="background:${cat.color}"></span>${cat.name}</div>
+            <span class="table-card-hint">셀 클릭으로 직접 편집 가능</span>
+        </div>
+        <div class="table-scroll"><table><thead><tr>${h1}</tr><tr>${h2}</tr></thead><tbody>${body}</tbody></table></div>
+    </div>`;
+}
+
+// =========================================
+// Cell Editing
+// =========================================
+function cellEdit(row, col, val) {
+    const k = `${row}_${col}`;
+    const orig = parsedData && parsedData[row] ? (parsedData[row][col]||'') : '';
+    if (val === orig) delete pendingChanges[k]; else pendingChanges[k] = val;
+    updateSaveBtn();
+    renderAll();
+}
+
+function cellKey(e, inp) {
+    if (e.key==='Enter') { inp.blur(); const td=inp.closest('td'),tr=td.closest('tr'),next=tr.nextElementSibling; if(next){const idx=[...tr.children].indexOf(td),ni=next.children[idx]?.querySelector('input'); if(ni)ni.focus();} }
+    else if (e.key==='Escape') { const r=parseInt(inp.closest('td').dataset.r),c=parseInt(inp.closest('td').dataset.c); inp.value=parsedData&&parsedData[r]?(parsedData[r][c]||''):''; delete pendingChanges[`${r}_${c}`]; inp.blur(); updateSaveBtn(); }
+}
+
+function updateSaveBtn() {
+    const n = Object.keys(pendingChanges).length;
+    const btn = document.getElementById('btnSave');
+    if (n) { btn.classList.add('visible'); btn.textContent = `변경사항 저장 (${n})`; }
+    else btn.classList.remove('visible');
+}
+
+// =========================================
+// Save
+// =========================================
+function saveChanges() {
+    const changes = Object.entries(pendingChanges);
+    if (!changes.length) return;
+    for (const [k,v] of changes) { const [r,c]=k.split('_').map(Number); if(parsedData[r]) parsedData[r][c]=v; }
+    const cnt = changes.length;
+    pendingChanges = {};
+    updateSaveBtn();
+    renderAll();
+    showToast(`${cnt}개 항목 로컬 저장 완료`, 'ok');
+}
+
+// =========================================
+// Input Modal (구글시트 템플릿 형식)
+// =========================================
+let modalMonth = null;
+
+function openInputModal() {
+    modalMonth = getCurrentMonth();
+    renderModalMonthTabs();
+    renderModalTable();
+    document.getElementById('inputModal').classList.add('open');
+}
+
+function renderModalMonthTabs() {
+    const tabs = document.getElementById('modalMonthTabs');
+    tabs.innerHTML = ['2','3','4'].map(m =>
+        `<div class="modal-month-tab${m===modalMonth?' active':''}" onclick="switchModalMonth('${m}')">${MONTHS[m].label}</div>`
+    ).join('');
+    document.getElementById('modalTitle').textContent = `${MONTHS[modalMonth].label} 주간 데이터 입력`;
+}
+
+function switchModalMonth(m) {
+    modalMonth = m;
+    renderModalMonthTabs();
+    renderModalTable();
+}
+
+function renderModalTable() {
+    const info = MONTHS[modalMonth];
+    if (!info.weeks.length) { document.getElementById('modalContent').innerHTML = '<p style="color:#8a93b0;font-size:12px">해당 월은 주차별 입력이 지원되지 않습니다.</p>'; return; }
+
+    // Build header: 구분 | 항목 | 1주 | 2주 | ... | 계
+    let thWeeks = info.weeks.map((_,i) => `<th class="th-week">${i+1}주</th>`).join('');
+    let thead = `<tr><th style="min-width:90px">구분</th><th style="min-width:130px;text-align:left;padding-left:12px">항목</th>${thWeeks}<th style="min-width:60px">계</th></tr>`;
+
+    // Build body per category
+    let tbody = '';
+    for (const cat of CATEGORIES) {
+        const rowspan = cat.items.length;
+        cat.items.forEach((item, idx) => {
+            tbody += '<tr>';
+            if (idx === 0) {
+                tbody += `<td class="td-cat" rowspan="${rowspan}">${cat.name}</td>`;
+            }
+            tbody += `<td class="td-item">${item.label}</td>`;
+            for (const wc of info.weeks) {
+                const v = getCellRaw(item.row, wc);
+                tbody += `<td><input type="text" value="${v}" data-r="${item.row}" data-c="${wc}" oninput="onModalInput(this)" onfocus="this.select()"></td>`;
+            }
+            // Total (read-only)
+            const total = getCellRaw(item.row, info.totalCol);
+            tbody += `<td class="td-total">${total || 0}</td>`;
+            tbody += '</tr>';
+        });
+    }
+
+    document.getElementById('modalContent').innerHTML =
+        `<div class="modal-table-wrap"><table class="modal-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table></div>`;
+    document.getElementById('modalChangeCount').textContent = '';
+}
+
+function onModalInput(inp) {
+    const r = parseInt(inp.dataset.r), c = parseInt(inp.dataset.c);
+    const orig = parsedData && parsedData[r] ? (parsedData[r][c]||'') : '';
+    if (inp.value.trim() !== orig) {
+        inp.classList.add('input-changed');
+    } else {
+        inp.classList.remove('input-changed');
+    }
+    // Count changes
+    const changed = document.querySelectorAll('#modalContent input.input-changed').length;
+    document.getElementById('modalChangeCount').textContent = changed ? `${changed}개 항목 변경됨` : '';
+}
+
+function closeInputModal() { document.getElementById('inputModal').classList.remove('open'); }
+
+function submitModalData() {
+    let cnt = 0;
+    document.querySelectorAll('#modalContent input[data-r]').forEach(inp => {
+        const r=parseInt(inp.dataset.r), c=parseInt(inp.dataset.c), v=inp.value.trim(), o=getCellRaw(r,c);
+        if (v!==o) { pendingChanges[`${r}_${c}`]=v; cnt++; }
+    });
+    if (cnt) { updateSaveBtn(); renderAll(); showToast(`${cnt}개 항목 변경됨. 저장 버튼을 눌러주세요.`); }
+    else { showToast('변경된 항목이 없습니다.'); }
+    closeInputModal();
+}
+
+// =========================================
+// View Switch
+// =========================================
+function switchView(v) {
+    currentView = v;
+    document.querySelectorAll('.month-tab').forEach(t => t.classList.toggle('active', t.dataset.month===v));
+    renderAll();
+}
+
+// =========================================
+// Sync UI
+// =========================================
+function setSyncStatus(s) {
+    const dot = document.getElementById('syncDot'), txt = document.getElementById('syncText');
+    dot.className = 'sync-dot';
+    if (s==='syncing') { dot.classList.add('syncing'); txt.textContent='동기화 중...'; }
+    else if (s==='err') { dot.classList.add('err'); txt.textContent='연결 오류'; }
+    else { txt.textContent='실시간 연동중'; }
+}
+
+function updateRefreshTimer() {
+    const el = document.getElementById('refreshTimer');
+    if (!lastRefresh) return;
+    const tick = () => { const s=Math.floor((Date.now()-lastRefresh)/1000); el.textContent = s<60?`${s}초 전 갱신`:`${Math.floor(s/60)}분 전 갱신`; };
+    tick(); setInterval(tick, 10000);
+}
+
+function updateHeaderTime() {
+    const now = new Date();
+    document.getElementById('headerTime').textContent = now.toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    document.getElementById('headerSub').textContent = `${now.toLocaleDateString('ko-KR',{weekday:'long'})} 기준`;
+}
+
+async function refreshData() {
+    await fetchSheetData();
+    renderAll();
+    showToast('데이터가 새로고침되었습니다.', 'ok');
+}
+
+function showToast(msg, type='') {
+    const t = document.getElementById('toast');
+    t.className = `toast-msg ${type}`;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// =========================================
+// Init
+// =========================================
+async function init() {
+    await fetchSheetData();
+    renderAll();
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    setInterval(async () => { if (!Object.keys(pendingChanges).length) { await fetchSheetData(); renderAll(); } }, AUTO_REFRESH);
+}
+
+init();
+</script>
+</body>
+</html>
