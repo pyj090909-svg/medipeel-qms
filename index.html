@@ -1359,15 +1359,22 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 </div>
 
 <script>
-// ── 기본 계정 (최초 1회만 localStorage에 씀) ──
+// ── 기본 계정 ──
+const ACCOUNTS_VER  = 'v2';   // 버전 올리면 localStorage 강제 초기화
 const DEFAULT_ACCOUNTS = [
-  { id:'admin',   pw:'medipeel1!', name:'관리자',    initials:'관', role:'admin' },
-  { id:'quality', pw:'quality1!',  name:'품질관리팀', initials:'품', role:'user'  },
-  { id:'steve',   pw:'steve1!',    name:'Steve',     initials:'S',  role:'user'  },
+  { id:'admin',   pw:'admin1234', name:'관리자',    initials:'관', role:'admin' },
+  { id:'quality', pw:'quality1!', name:'품질관리팀', initials:'품', role:'user'  },
+  { id:'steve',   pw:'steve1!',   name:'Steve',     initials:'S',  role:'user'  },
 ];
 const STORE_KEY = 'qms_accounts';
+const VER_KEY   = 'qms_accounts_ver';
 
 function loadAccounts() {
+  // 버전이 다르면 기본값으로 강제 리셋
+  if (localStorage.getItem(VER_KEY) !== ACCOUNTS_VER) {
+    saveAccounts(DEFAULT_ACCOUNTS);
+    return DEFAULT_ACCOUNTS;
+  }
   const raw = localStorage.getItem(STORE_KEY);
   if (raw) return JSON.parse(raw);
   saveAccounts(DEFAULT_ACCOUNTS);
@@ -1375,6 +1382,7 @@ function loadAccounts() {
 }
 function saveAccounts(list) {
   localStorage.setItem(STORE_KEY, JSON.stringify(list));
+  localStorage.setItem(VER_KEY, ACCOUNTS_VER);
 }
 function getInitials(name) {
   if (!name) return '?';
