@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QMS v1.0 — MEDIPEEL 품질 경영 대시보드</title>
+<style>
+:root {
+  --bg:#f4f5f7;
+  --bg2:#ffffff;
+  --bg3:#eef0f5;
+  --border:rgba(0,0,0,.08);
+  --border2:rgba(0,0,0,.14);
+  --text:#1a2035;
+  --text2:#4a5470;
+  --text3:#8a93b0;
+  /* 품질관리팀 블루 */
+  --brand:#2e5fe8;
+  --brand2:#1a4acc;
+  --brand3:#5a8aff;
+  --accent:#2e5fe8;
+  --accent2:#1a4acc;
+  --green:#0ea97e;
+  --red:#e03c3c;
+  --amber:#d98b10;
+  --blue:#2e5fe8;
+  --purple:#7c5ce8;
+  --teal:#0891b2;
+  --font:-apple-system,'Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',sans-serif;
+  --shadow2:0 2px 10px rgba(0,0,0,.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+
+/* ── 보안 배너 (최상단/최하단 공용) ── */
+.sec-bar {
+  width:100%;
+  background:#0a1230;
+  color:rgba(255,255,255,.75);
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:.03em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  padding:7px 20px;
+  position:relative;
+  z-index:200;
+  user-select:none;
+}
+.sec-bar .sec-icon {
+  font-size:12px;
+  flex-shrink:0;
+}
+.sec-bar strong { color:#8ab4ff; font-weight:700; }
+.sec-bar .sec-sep {
+  width:1px;
+  height:12px;
+  background:rgba(255,255,255,.15);
+}
+.sec-bar .sec-right { margin-left:auto; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.sec-collect { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:rgba(255,255,255,.70); }
+.sec-collect-dot { width:6px; height:6px; border-radius:50%; background:#f87171; flex-shrink:0; animation:sec-blink 1.2s ease-in-out infinite; }
+@keyframes sec-blink { 0%,100%{opacity:1} 50%{opacity:.12} }
+.sec-ip-tag { font-size:11px; color:rgba(255,255,255,.55); white-space:nowrap; }
+.sec-ip-tag strong { color:#8ab4ff; }
+.sec-bar-bottom {
+  background:#060d22;
+  font-size:10px;
+  color:rgba(255,255,255,.45);
+  padding:6px 20px;
+}
+.sec-bar-bottom strong { color:rgba(255,255,255,.65); }
+
+/* ── LOGIN SCREEN ── */
+#login-screen {
+  min-height:calc(100vh - 34px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: linear-gradient(145deg, #0a1535 0%, #0f1c4a 35%, #091230 70%, #0c1840 100%);
+  position:relative;
+  overflow:hidden;
+}
+#login-screen::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(ellipse 600px 400px at 20% 50%, rgba(200,16,46,.22) 0%, transparent 65%),
+    radial-gradient(ellipse 400px 400px at 85% 20%, rgba(180,10,30,.15) 0%, transparent 60%),
+    radial-gradient(ellipse 350px 350px at 65% 85%, rgba(150,5,20,.12) 0%, transparent 60%);
+}
+#login-screen::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size:32px 32px;
+}
+
+.login-box {
+  position:relative;
+  z-index:10;
+  background:rgba(255,255,255,.04);
+  backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:24px;
+  padding:52px 48px 44px;
+  width:440px;
+  box-shadow:0 24px 64px rgba(0,0,0,.50), 0 0 0 1px rgba(255,255,255,.04);
+}
+
+.login-logo-wrap {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:10px;
+}
+.login-logo-img {
+  height:28px;
+  width:auto;
+  /* 흰색으로 반전 */
+  filter:invert(1) brightness(2);
+  flex-shrink:0;
+}
+.login-logo-divv {
+  width:1px;
+  height:32px;
+  background:rgba(255,255,255,.18);
+}
+.login-logo-right {}
+.login-logo-text {
+  font-size:13px;
+  font-weight:700;
+  color:rgba(255,255,255,.90);
+  letter-spacing:.04em;
+}
+.login-logo-sub {
+  font-size:10px;
+  color:rgba(255,255,255,.38);
+  margin-top:2px;
+  letter-spacing:.04em;
+}
+.login-divider {
+  height:1px;
+  background:rgba(255,255,255,.08);
+  margin:22px 0;
+}
+.login-title {
+  font-size:15px;
+  font-weight:700;
+  color:rgba(255,255,255,.88);
+  margin-bottom:4px;
+}
+.login-desc {
+  font-size:12px;
+  color:rgba(255,255,255,.35);
+  margin-bottom:28px;
+}
+
+.form-group { margin-bottom:16px; }
+.form-label {
+  display:block;
+  font-size:11px;
+  font-weight:600;
+  color:rgba(255,255,255,.45);
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  margin-bottom:7px;
+}
+.form-input {
+  width:100%;
+  padding:12px 16px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:10px;
+  font-size:13px;
+  font-family:var(--font);
+  color:#fff;
+  outline:none;
+  transition:border-color .2s, background .2s;
+}
+.form-input::placeholder { color:rgba(255,255,255,.20); }
+.form-input:focus {
+  border-color:rgba(200,16,46,.60);
+  background:rgba(200,16,46,.07);
+}
+.form-input:-webkit-autofill {
+  -webkit-box-shadow:0 0 0 100px rgba(40,5,10,.95) inset;
+  -webkit-text-fill-color:#fff;
+}
+
+.login-error {
+  font-size:12px;
+  color:#8ab4ff;
+  background:rgba(46,95,232,.12);
+  border:1px solid rgba(46,95,232,.25);
+  border-radius:8px;
+  padding:9px 14px;
+  margin-bottom:14px;
+  display:none;
+}
+.login-error.show { display:block; }
+
+.btn-login {
+  width:100%;
+  padding:14px;
+  background:linear-gradient(135deg,#2e5fe8,#1a4acc);
+  border:none;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:700;
+  font-family:var(--font);
+  color:#fff;
+  cursor:pointer;
+  letter-spacing:.02em;
+  transition:opacity .2s, transform .1s;
+  margin-top:4px;
+  box-shadow:0 4px 20px rgba(200,16,46,.40);
+}
+.btn-login:hover { opacity:.90; }
+.btn-login:active { transform:scale(.99); }
+
+.login-ver-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  margin-top:20px;
+  font-size:10px;
+  font-weight:600;
+  color:rgba(255,255,255,.25);
+  letter-spacing:.06em;
+}
+
+/* ── MAIN APP ── */
+#main-app { display:none; min-height:100vh; flex-direction:column; }
+
+/* Top nav */
+.topnav {
+  height:58px;
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 28px;
+  gap:14px;
+  position:sticky;
+  top:0;
+  z-index:100;
+  box-shadow:0 1px 6px rgba(0,0,0,.06);
+}
+.topnav-logo {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+}
+.topnav-logo-img {
+  height:20px;
+  width:auto;
+}
+.topnav-divider {
+  width:1px;
+  height:22px;
+  background:var(--border2);
+}
+.topnav-name {
+  font-size:13px;
+  font-weight:700;
+  color:var(--text);
+  letter-spacing:.01em;
+  white-space:nowrap;
+}
+.topnav-ver {
+  font-size:10px;
+  font-weight:700;
+  color:#fff;
+  background:var(--brand);
+  border-radius:4px;
+  padding:2px 7px;
+  letter-spacing:.04em;
+}
+.topnav-spacer { flex:1; }
+.topnav-user {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-size:12px;
+  color:var(--text2);
+}
+.topnav-avatar {
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--brand),var(--brand3));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:700;
+  color:#fff;
+}
+.topnav-time {
+  font-size:11px;
+  color:var(--text3);
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:3px 10px;
+  font-variant-numeric:tabular-nums;
+}
+.btn-logout {
+  font-size:11px;
+  font-weight:600;
+  color:var(--text3);
+  background:none;
+  border:1px solid var(--border2);
+  border-radius:7px;
+  padding:5px 12px;
+  cursor:pointer;
+  font-family:var(--font);
+  transition:background .15s;
+}
+.btn-logout:hover { background:var(--bg3); }
+
+/* Main content */
+.main-content {
+  max-width:1160px;
+  margin:0 auto;
+  padding:40px 28px 60px;
+  flex:1;
+}
+
+/* Hero */
+.hero {
+  background:linear-gradient(135deg,#0a1535 0%,#0f2060 50%,#0c1840 100%);
+  border-radius:20px;
+  padding:22px 40px;
+  margin-bottom:24px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 8px 32px rgba(200,16,46,.20);
+}
+.hero::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(ellipse 500px 300px at 90% 50%, rgba(200,16,46,.22) 0%, transparent 60%),
+    radial-gradient(ellipse 300px 300px at 10% 80%, rgba(240,80,80,.10) 0%, transparent 60%);
+  pointer-events:none;
+}
+.hero::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size:28px 28px;
+  pointer-events:none;
+}
+.hero-inner {
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  gap:28px;
+}
+.hero-logo-block {
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:10px;
+  padding-top:4px;
+}
+.hero-logo-img {
+  height:26px;
+  width:auto;
+  filter:invert(1) brightness(2);
+  opacity:.80;
+}
+.hero-logo-sep {
+  width:36px;
+  height:2px;
+  background:var(--brand);
+  border-radius:1px;
+}
+.hero-body { flex:1; }
+.hero-eyebrow {
+  font-size:11px;
+  font-weight:600;
+  color:rgba(255,255,255,.40);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  margin-bottom:6px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.hero-dot {
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#0ea97e;
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+.hero-title {
+  font-size:22px;
+  font-weight:800;
+  color:#fff;
+  letter-spacing:-.02em;
+  line-height:1.25;
+  margin-bottom:6px;
+}
+.hero-title span { color:#8ab4ff; }
+.hero-desc {
+  font-size:12px;
+  color:rgba(255,255,255,.48);
+  max-width:500px;
+  line-height:1.6;
+  margin-bottom:0;
+}
+.hero-stats {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  flex-shrink:0;
+  padding-left:28px;
+  border-left:1px solid rgba(255,255,255,.12);
+  margin-left:auto;
+}
+.hero-stat { display:flex; flex-direction:column; gap:2px; }
+.hero-stat-val {
+  font-size:16px;
+  font-weight:700;
+  color:#fff;
+  letter-spacing:-.01em;
+}
+.hero-stat-val span { font-size:11px; font-weight:400; color:rgba(255,255,255,.45); margin-left:2px; }
+.hero-stat-lbl { font-size:10px; color:rgba(255,255,255,.35); }
+.hero-sep { display:none; }
+
+/* Section title */
+.section-header {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:18px;
+}
+.section-title { font-size:16px; font-weight:700; color:var(--text); letter-spacing:-.01em; }
+.section-count {
+  font-size:11px;
+  font-weight:600;
+  color:var(--text3);
+  background:var(--bg3);
+  border-radius:5px;
+  padding:1px 8px;
+}
+
+/* Menu grid */
+.menu-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+  margin-bottom:36px;
+}
+
+.menu-card {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:28px 30px;
+  cursor:pointer;
+  text-decoration:none;
+  color:inherit;
+  display:block;
+  position:relative;
+  overflow:hidden;
+  transition:transform .18s, box-shadow .18s, border-color .18s;
+  box-shadow:var(--shadow2);
+}
+.menu-card:hover {
+  transform:translateY(-3px);
+  box-shadow:0 8px 28px rgba(200,16,46,.13);
+  border-color:rgba(200,16,46,.18);
+}
+.menu-card::before {
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:3px;
+  border-radius:16px 16px 0 0;
+}
+.menu-card.c1::before { background:linear-gradient(90deg,#e03c3c,#f07070); }
+.menu-card.c2::before { background:linear-gradient(90deg,#2e5fe8,#7c5ce8); }
+.menu-card.c3::before { background:linear-gradient(90deg,#0ea97e,#0bc4a8); }
+.menu-card.c4::before { background:linear-gradient(90deg,#d98b10,#f0b030); }
+.menu-card.c5::before { background:linear-gradient(90deg,#0891b2,#38bdf8); }
+.menu-card.c6::before { background:linear-gradient(90deg,#16a34a,#4ade80); }
+.menu-card.c7::before { background:linear-gradient(90deg,#7c3aed,#c084fc); }
+
+.menu-card-head { display:flex; align-items:flex-start; gap:16px; margin-bottom:16px; }
+.menu-icon {
+  width:48px;
+  height:48px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  flex-shrink:0;
+}
+.menu-card.c1 .menu-icon { background:rgba(200,16,46,.08); }
+.menu-card.c2 .menu-icon { background:rgba(46,95,232,.10); }
+.menu-card.c3 .menu-icon { background:rgba(14,169,126,.10); }
+.menu-card.c4 .menu-icon { background:rgba(217,139,16,.10); }
+.menu-card.c5 .menu-icon { background:rgba(8,145,178,.10); }
+.menu-card.c6 .menu-icon { background:rgba(22,163,74,.10); }
+.menu-card.c7 .menu-icon { background:rgba(124,58,237,.10); }
+.menu-card.c8::before { background:linear-gradient(90deg,#64748b,#94a3b8); }
+.menu-card.c8 .menu-icon { background:rgba(100,116,139,.10); }
+
+.menu-card-num {
+  font-size:10px;
+  font-weight:700;
+  color:var(--text3);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.menu-card-title { font-size:15px; font-weight:700; color:var(--text); letter-spacing:-.01em; line-height:1.3; }
+.menu-card-desc { font-size:12px; color:var(--text2); line-height:1.65; margin-bottom:18px; }
+.menu-card-tags { display:flex; flex-wrap:wrap; gap:6px; }
+.tag { font-size:10px; font-weight:600; padding:2px 9px; border-radius:5px; letter-spacing:.02em; }
+.tag.red    { background:rgba(224,60,60,.08);  color:#c0202f; }
+.tag.blue   { background:rgba(46,95,232,.08);  color:#1a4acc; }
+.tag.green  { background:rgba(14,169,126,.08); color:#077a5a; }
+.tag.amber  { background:rgba(217,139,16,.08); color:#9a5f00; }
+.tag.gray   { background:rgba(0,0,0,.05);      color:#5a6070; }
+
+.menu-card-arrow {
+  position:absolute;
+  bottom:22px;right:22px;
+  width:28px;height:28px;
+  border-radius:8px;
+  background:var(--bg3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--text3);
+  transition:background .15s, color .15s;
+}
+.menu-card:hover .menu-card-arrow { background:var(--brand); color:#fff; }
+
+.wip-badge {
+  position:absolute;
+  top:18px;right:18px;
+  font-size:10px;font-weight:700;
+  color:var(--amber);
+  background:rgba(217,139,16,.10);
+  border:1px solid rgba(217,139,16,.20);
+  border-radius:5px;padding:2px 8px;
+  letter-spacing:.04em;
+}
+
+/* ── 비활성 카드 (개발 예정) ── */
+.menu-card.inactive {
+  filter:grayscale(1);
+  opacity:.38;
+  pointer-events:none;
+  cursor:default;
+  box-shadow:none;
+}
+.menu-card.inactive:hover {
+  transform:none;
+  box-shadow:none;
+  border-color:var(--border);
+}
+.menu-card.inactive .menu-card-arrow { display:none; }
+.menu-card.inactive .wip-badge {
+  color:#6b7280;
+  background:rgba(0,0,0,.06);
+  border-color:rgba(0,0,0,.10);
+}
+
+/* Info row */
+.info-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.info-card {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:18px 22px;
+  box-shadow:var(--shadow2);
+}
+.info-card-title {
+  font-size:11px;font-weight:600;
+  color:var(--text3);
+  letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:7px;
+}
+.info-card-title::before {
+  content:'';width:3px;height:12px;
+  border-radius:2px;background:var(--brand);
+}
+/* ── 메모 컴포넌트 ── */
+.memo-wrap { display:flex; flex-direction:column; height:100%; gap:0; }
+.memo-textarea {
+  flex:1; width:100%; border:none; background:transparent; resize:none;
+  font-size:13px; color:var(--text); line-height:1.7; font-family:var(--font);
+  outline:none; cursor:default; min-height:130px; padding:4px 2px;
+}
+.memo-textarea::placeholder { color:#b8bdd4; font-style:italic; }
+.memo-footer { display:flex; align-items:center; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px dashed #e4e8f2; }
+.memo-hint { font-size:10px; color:#b0bad0; }
+.memo-saved { font-size:10px; color:var(--brand); opacity:0; transition:opacity .3s; }
+.memo-saved.show { opacity:1; }
+
+.notice-list { list-style:none; }
+.notice-item {
+  display:flex;align-items:flex-start;gap:9px;
+  padding:7px 0;
+  border-bottom:1px solid var(--bg3);
+  font-size:12px;color:var(--text2);
+}
+.notice-item:last-child { border-bottom:none; }
+.notice-dot { width:5px;height:5px;border-radius:50%;background:var(--brand);margin-top:6px;flex-shrink:0; }
+.notice-dot.g { background:var(--green); }
+.notice-dot.a { background:var(--amber); }
+.notice-meta { font-size:10px;color:var(--text3);margin-top:2px; }
+
+.sys-list { display:grid;grid-template-columns:repeat(2,1fr);gap:8px; }
+.sys-item {
+  display:flex;align-items:center;gap:10px;cursor:default;
+  padding:9px 12px;background:var(--bg);
+  border-radius:9px;font-size:12px;
+}
+.sys-status { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+.sys-status.on { background:var(--green);box-shadow:0 0 5px rgba(14,169,126,.5);animation:pulse 2.5s infinite; }
+.sys-status.prep { background:var(--amber); }
+.sys-name-wrap { flex:1; display:flex; flex-direction:column; gap:2px; }
+.sys-name { color:var(--text2);font-weight:500;font-size:13px; }
+.sys-date { font-size:10px; color:#b8bdd4; }
+.sys-date.loaded { color:#0ea97e; }
+.sys-date.err    { color:#d0d5e8; }
+.sys-badge { font-size:10px;font-weight:600;padding:1px 7px;border-radius:4px;flex-shrink:0; }
+.sys-badge.on  { background:rgba(14,169,126,.10);color:#077a5a; }
+.sys-badge.prep{ background:rgba(217,139,16,.10);color:#9a5f00; }
+
+/* ── 계정 관리 모달 ── */
+.modal-overlay {
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(4px);
+  z-index:500;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+  background:var(--bg2);
+  border-radius:20px;
+  width:680px;
+  max-width:95vw;
+  max-height:88vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 24px 64px rgba(0,0,0,.28);
+  overflow:hidden;
+}
+.modal-head {
+  padding:24px 28px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:14px;
+  flex-shrink:0;
+}
+.modal-head-icon {
+  width:40px;height:40px;
+  border-radius:11px;
+  background:rgba(200,16,46,.10);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.modal-head-title { font-size:16px;font-weight:700;color:var(--text); }
+.modal-head-sub   { font-size:11px;color:var(--text3);margin-top:2px; }
+.modal-close {
+  margin-left:auto;
+  width:32px;height:32px;
+  border-radius:8px;
+  background:var(--bg3);
+  border:none;cursor:pointer;
+  font-size:16px;color:var(--text2);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  transition:background .15s;
+}
+.modal-close:hover { background:var(--bg3); color:var(--brand); }
+.modal-body {
+  flex:1;overflow-y:auto;
+  padding:24px 28px;
+}
+.modal-section-title {
+  font-size:12px;font-weight:700;
+  color:var(--text3);
+  letter-spacing:.07em;text-transform:uppercase;
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.modal-section-title::before {
+  content:'';width:3px;height:12px;
+  border-radius:2px;background:var(--brand);
+}
+
+/* 사용자 목록 테이블 */
+.user-table {
+  width:100%;
+  border-collapse:collapse;
+  margin-bottom:28px;
+  font-size:13px;
+}
+.user-table th {
+  text-align:left;
+  font-size:11px;font-weight:600;
+  color:var(--text3);
+  letter-spacing:.05em;text-transform:uppercase;
+  padding:0 12px 10px;
+  border-bottom:1px solid var(--border);
+}
+.user-table td {
+  padding:11px 12px;
+  border-bottom:1px solid var(--bg3);
+  vertical-align:middle;
+}
+.user-table tr:last-child td { border-bottom:none; }
+.user-table tr:hover td { background:var(--bg); }
+.u-avatar {
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--brand),var(--brand3));
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;
+  flex-shrink:0;
+}
+.u-avatar.gray { background:linear-gradient(135deg,#6b7a99,#8a93b0); }
+.u-id   { font-weight:600;color:var(--text); }
+.u-name { color:var(--text2); }
+.role-badge {
+  font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;
+  letter-spacing:.04em;
+}
+.role-badge.admin { background:rgba(46,95,232,.10);color:#1a4acc; }
+.role-badge.user  { background:rgba(46,95,232,.08);color:#1a4acc; }
+.tbl-btn {
+  font-size:11px;font-weight:600;
+  padding:4px 10px;border-radius:6px;
+  border:1px solid var(--border2);
+  background:var(--bg);
+  cursor:pointer;font-family:var(--font);
+  color:var(--text2);
+  transition:background .14s,color .14s;
+  margin-left:4px;
+}
+.tbl-btn:hover { background:var(--brand);color:#fff;border-color:var(--brand); }
+.tbl-btn.del:hover { background:#c0202f;color:#fff;border-color:#c0202f; }
+
+/* 신규 계정 추가 폼 */
+.add-form {
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:20px 22px;
+}
+.add-form-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-bottom:14px;
+}
+.af-group {}
+.af-label {
+  display:block;
+  font-size:11px;font-weight:600;
+  color:var(--text3);
+  letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:6px;
+}
+.af-input {
+  width:100%;
+  padding:10px 13px;
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  font-size:13px;font-family:var(--font);
+  color:var(--text);outline:none;
+  transition:border-color .2s;
+}
+.af-input:focus { border-color:var(--brand); }
+.af-select {
+  width:100%;
+  padding:10px 13px;
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  font-size:13px;font-family:var(--font);
+  color:var(--text);outline:none;
+  cursor:pointer;
+}
+.af-footer { display:flex;align-items:center;gap:10px; }
+.af-msg { font-size:12px;flex:1; }
+.af-msg.ok  { color:var(--green); }
+.af-msg.err { color:var(--brand); }
+.btn-add-user {
+  padding:9px 20px;
+  background:var(--brand);
+  border:none;border-radius:8px;
+  font-size:13px;font-weight:700;font-family:var(--font);
+  color:#fff;cursor:pointer;
+  transition:opacity .15s;
+}
+.btn-add-user:hover { opacity:.88; }
+
+/* 비밀번호 변경 폼 (인라인 행) */
+.pw-change-row {
+  background:rgba(200,16,46,.04);
+  border:1px solid rgba(200,16,46,.14);
+  border-radius:8px;
+  padding:10px 12px;
+  display:none;
+}
+.pw-change-row.open { display:flex;align-items:center;gap:8px; }
+.pw-change-row .af-input { padding:7px 11px;font-size:12px; }
+.btn-pw-save {
+  padding:6px 14px;
+  background:var(--brand);border:none;border-radius:6px;
+  font-size:12px;font-weight:700;font-family:var(--font);
+  color:#fff;cursor:pointer;white-space:nowrap;
+  flex-shrink:0;
+}
+.btn-pw-cancel {
+  padding:6px 10px;
+  background:var(--bg3);border:none;border-radius:6px;
+  font-size:12px;font-family:var(--font);
+  color:var(--text2);cursor:pointer;
+  flex-shrink:0;
+}
+
+/* topnav admin btn */
+.btn-admin {
+  font-size:11px;font-weight:600;
+  color:var(--brand);
+  background:rgba(200,16,46,.08);
+  border:1px solid rgba(200,16,46,.18);
+  border-radius:7px;padding:5px 12px;
+  cursor:pointer;font-family:var(--font);
+  transition:background .15s;
+  display:none;
+}
+.btn-admin:hover { background:rgba(200,16,46,.16); }
+.btn-admin.visible { display:inline-block; }
+
+/* ── 하단 보안 푸터 ── */
+.sec-footer {
+  background:#0a1230;
+  color:rgba(255,255,255,.40);
+  font-size:11px;
+  text-align:center;
+  padding:14px 20px;
+  line-height:1.7;
+}
+.sec-footer strong { color:rgba(255,255,255,.65); }
+
+</style>
+</head>
+<body>
+
+<!-- ✦ 최상단 보안 배너 ✦ -->
+<div class="sec-bar">
+  <span class="sec-icon">🔒</span>
+  <span><strong>MEDIPEEL 기밀 시스템</strong> — 임직원 전용 · 모든 접속 및 활동이 기록됩니다.</span>
+  <span class="sec-sep"></span>
+  <span>무단 접근 · 정보 유출 시 사규 및 관련 법령에 따라 엄중 처벌됩니다.</span>
+  <div class="sec-right">
+    <span class="sec-sep"></span>
+    <span class="sec-collect">
+      <span class="sec-collect-dot"></span>
+      보안 정보 수집 중
+    </span>
+    <span class="sec-sep"></span>
+    <span class="sec-ip-tag">접속 IP <strong id="sec-ip-val">확인 중...</strong></span>
+  </div>
+</div>
+
+<!-- ── LOGIN SCREEN ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo-wrap">
+      <img class="login-logo-img" src="images/logo.png" alt="MEDIPEEL+">
+      <div class="login-logo-divv"></div>
+      <div class="login-logo-right">
+        <div class="login-logo-text">품질 경영 대시보드</div>
+        <div class="login-logo-sub">Quality Management System</div>
+      </div>
+    </div>
+    <div class="login-divider"></div>
+    <div class="login-title">시스템 로그인</div>
+    <div class="login-desc">MEDIPEEL 임직원 계정으로 로그인하세요.</div>
+
+    <div id="login-error" class="login-error">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+
+    <div class="form-group">
+      <label class="form-label" for="inp-id">아이디</label>
+      <input class="form-input" id="inp-id" type="text" placeholder="아이디를 입력하세요" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="inp-pw">비밀번호</label>
+      <input class="form-input" id="inp-pw" type="password" placeholder="비밀번호를 입력하세요" autocomplete="current-password">
+    </div>
+    <button class="btn-login" onclick="doLogin()">로그인</button>
+
+    <div class="login-ver-badge">QMS v1.0 &nbsp;·&nbsp; MEDIPEEL 품질관리팀 전용</div>
+  </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="main-app">
+
+  <!-- Top nav -->
+  <nav class="topnav">
+    <a class="topnav-logo" href="#">
+      <img class="topnav-logo-img" src="images/logo.png" alt="MEDIPEEL+">
+      <div class="topnav-divider"></div>
+      <span class="topnav-name">품질 경영 대시보드</span>
+      <span class="topnav-ver">QMS v1.0</span>
+    </a>
+    <div class="topnav-spacer"></div>
+    <div class="topnav-time" id="clock">--:--:--</div>
+    <div class="topnav-user">
+      <div class="topnav-avatar" id="user-avatar">?</div>
+      <span id="user-name-display">-</span>
+    </div>
+    <button class="btn-admin" id="btn-admin" onclick="openAdminModal()">⚙ 계정 관리</button>
+    <button class="btn-logout" onclick="doLogout()">로그아웃</button>
+  </nav>
+
+  <!-- Content -->
+  <div class="main-content">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="hero-logo-block">
+          <img class="hero-logo-img" src="images/logo.png" alt="MEDIPEEL+">
+          <div class="hero-logo-sep"></div>
+        </div>
+        <div class="hero-body">
+          <div class="hero-eyebrow">
+            <div class="hero-dot"></div>
+            Quality Management System
+          </div>
+          <div class="hero-title">
+            품질 경영 대시보드 <span>QMS v1.0</span>
+          </div>
+          <div class="hero-desc">
+            클레임 처리, 품질 지표, 환경마크, 협력업체 평가 등<br>
+            품질관리 전반의 현황을 한 곳에서 관리합니다.
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-val">4 <span>개 모듈</span></div>
+            <div class="hero-stat-lbl">운영 중</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-val" id="hero-date">-</div>
+            <div class="hero-stat-lbl">기준일</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-val">QMS <span>v1.0</span></div>
+            <div class="hero-stat-lbl">현재 버전</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu section -->
+    <div class="section-header">
+      <div class="section-title">메뉴</div>
+      <div class="section-count">4개 모듈</div>
+    </div>
+
+    <div class="menu-grid">
+
+      <!-- 1. 클레임 접수/처리 -->
+      <a class="menu-card c1" href="claim/index.html">
+        <div class="menu-card-head">
+          <div class="menu-icon">📋</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_01</div>
+            <div class="menu-card-title">클레임 접수 / 처리 업무</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">
+          고객 클레임 접수부터 처리 완료까지 전 과정을 추적 관리합니다.
+          채널별 접수 현황, 처리 진행 상태, 완료율을 실시간으로 모니터링합니다.
+        </div>
+        <div class="menu-card-tags">
+          <span class="tag red">클레임 접수</span>
+          <span class="tag red">처리 현황</span>
+          <span class="tag gray">채널별 분석</span>
+          <span class="tag gray">완료율 추적</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+      </a>
+
+      <!-- 2. 품질관리 일반 지표 -->
+      <a class="menu-card c2" href="quality/index.html">
+        <div class="menu-card-head">
+          <div class="menu-icon">📊</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_02</div>
+            <div class="menu-card-title">품질관리 일반 지표</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">
+          불량률, 합격률, 공정 검사 결과 등 주요 품질 KPI를 시각화합니다.
+          월별 트렌드와 목표 대비 실적을 한눈에 파악할 수 있습니다.
+        </div>
+        <div class="menu-card-tags">
+          <span class="tag blue">불량률</span>
+          <span class="tag blue">합격률</span>
+          <span class="tag gray">월별 트렌드</span>
+          <span class="tag gray">KPI 현황</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+      </a>
+
+      <!-- 3. 글로벌 환경마크 -->
+      <a class="menu-card c3 inactive" href="ecomark/index.html">
+        <div class="menu-card-head">
+          <div class="menu-icon">🌿</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_03</div>
+            <div class="menu-card-title">글로벌 환경마크 세션</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">
+          국가별 환경마크 인증 현황 및 갱신 일정을 관리합니다.
+          인증 취득·유지 현황, 만료 예정 알림, 서류 관리를 지원합니다.
+        </div>
+        <div class="menu-card-tags">
+          <span class="tag green">인증 현황</span>
+          <span class="tag green">갱신 관리</span>
+          <span class="tag gray">만료 알림</span>
+          <span class="tag gray">국가별 현황</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+      </a>
+
+      <!-- 4. 협력업체 평가 -->
+      <a class="menu-card c4 inactive" href="supplier/index.html">
+        <div class="menu-card-head">
+          <div class="menu-icon">🤝</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_04</div>
+            <div class="menu-card-title">협력업체 평가</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">
+          협력업체 품질 평가 결과를 주기적으로 관리합니다.
+          평가 항목별 점수, 등급 분류, 개선 요청 현황을 추적합니다.
+        </div>
+        <div class="menu-card-tags">
+          <span class="tag amber">업체 평가</span>
+          <span class="tag amber">등급 관리</span>
+          <span class="tag gray">개선 요청</span>
+          <span class="tag gray">이력 추적</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+        <div class="wip-badge">준비 중</div>
+      </a>
+
+      <!-- 5. RA 비용 관리 -->
+      <a class="menu-card c5 inactive" href="ra/index.html">
+        <div class="menu-card-head">
+          <div class="menu-icon">💰</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_05</div>
+            <div class="menu-card-title">RA 비용 관리</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">
+          Regulatory Affairs 관련 비용을 항목별로 관리합니다.
+          인증·등록·검사 비용 현황 및 예산 대비 집행 현황을 추적합니다.
+        </div>
+        <div class="menu-card-tags">
+          <span class="tag" style="background:#e0f2fe;color:#0369a1">인증비용</span>
+          <span class="tag" style="background:#e0f2fe;color:#0369a1">등록비</span>
+          <span class="tag gray">예산 관리</span>
+          <span class="tag gray">집행 현황</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+        <div class="wip-badge">준비 중</div>
+      </a>
+
+      <!-- 6. 비건 인증 관리 -->
+      <a class="menu-card c6 inactive" href="vegan/index.html">
+        <div class="menu-card-head">
+          <div class="menu-icon">🌱</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_06</div>
+            <div class="menu-card-title">비건 인증 관리</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">
+          비건 인증 현황 및 갱신 일정을 관리합니다.
+          인증 기관별·제품별 취득 현황과 만료 일정을 추적합니다.
+        </div>
+        <div class="menu-card-tags">
+          <span class="tag" style="background:#dcfce7;color:#15803d">비건 인증</span>
+          <span class="tag" style="background:#dcfce7;color:#15803d">갱신 관리</span>
+          <span class="tag gray">인증 기관</span>
+          <span class="tag gray">만료 알림</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+        <div class="wip-badge">준비 중</div>
+      </a>
+
+      <!-- 7. 포장재 상용성 시험 관리 -->
+      <a class="menu-card c7 inactive" href="packaging/index.html">
+        <div class="menu-card-head">
+          <div class="menu-icon">🧪</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_07</div>
+            <div class="menu-card-title">포장재 상용성 시험 관리</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">
+          포장재 상용성 시험 결과를 품목별로 관리합니다.
+          시험 항목별 적합·부적합 현황 및 이력을 추적합니다.
+        </div>
+        <div class="menu-card-tags">
+          <span class="tag" style="background:#ede9fe;color:#6d28d9">상용성 시험</span>
+          <span class="tag" style="background:#ede9fe;color:#6d28d9">적합 판정</span>
+          <span class="tag gray">시험 이력</span>
+          <span class="tag gray">품목 관리</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+        <div class="wip-badge">준비 중</div>
+      </a>
+
+      <!-- 8. 예비 -->
+      <a class="menu-card c8 inactive" href="#">
+        <div class="menu-card-head">
+          <div class="menu-icon">📌</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_08</div>
+            <div class="menu-card-title">예비</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">추후 운영 모듈로 활용될 예비 슬롯입니다.</div>
+        <div class="menu-card-tags">
+          <span class="tag gray">미정</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+        <div class="wip-badge">준비 중</div>
+      </a>
+
+      <!-- 9. 예비 -->
+      <a class="menu-card c8 inactive" href="#">
+        <div class="menu-card-head">
+          <div class="menu-icon">📌</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_09</div>
+            <div class="menu-card-title">예비</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">추후 운영 모듈로 활용될 예비 슬롯입니다.</div>
+        <div class="menu-card-tags">
+          <span class="tag gray">미정</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+        <div class="wip-badge">준비 중</div>
+      </a>
+
+    </div>
+
+    <!-- Info row -->
+    <div class="info-row">
+      <div class="info-card">
+        <div class="info-card-title">📝 메모</div>
+        <div class="memo-wrap">
+          <textarea class="memo-textarea" id="qms-memo" placeholder="더블클릭하여 메모를 입력하세요…" readonly></textarea>
+          <div class="memo-footer">
+            <span class="memo-hint">더블클릭 → 편집 · 포커스 해제 → 자동 저장</span>
+            <span class="memo-saved" id="memo-saved">저장됨 ✓</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-title">모듈 운영 상태</div>
+        <div class="sys-list">
+          <div class="sys-item" data-webapp="https://script.google.com/macros/s/AKfycbxN2bX9X2_iEjYAN3WWrZtW9NvF9--R2KLSMIPN3Rw4j7cXOBTGcGxnZrrdJ9fXbgD1/exec">
+            <div class="sys-status on"></div>
+            <div class="sys-name-wrap">
+              <span class="sys-name">📋 클레임 접수/처리 업무</span>
+              <span class="sys-date" id="sysdate-01">확인 중...</span>
+            </div>
+            <div class="sys-badge on">운영</div>
+          </div>
+          <div class="sys-item" data-webapp="">
+            <div class="sys-status on"></div>
+            <div class="sys-name-wrap">
+              <span class="sys-name">📊 품질관리 일반 지표</span>
+              <span class="sys-date" id="sysdate-02">URL 미연결</span>
+            </div>
+            <div class="sys-badge on">운영</div>
+          </div>
+          <div class="sys-item" data-webapp="">
+            <div class="sys-status on"></div>
+            <div class="sys-name-wrap">
+              <span class="sys-name">🌿 글로벌 환경마크</span>
+              <span class="sys-date" id="sysdate-03">URL 미연결</span>
+            </div>
+            <div class="sys-badge on">운영</div>
+          </div>
+          <div class="sys-item" data-webapp="">
+            <div class="sys-status prep"></div>
+            <div class="sys-name-wrap">
+              <span class="sys-name">🤝 협력업체 평가</span>
+              <span class="sys-date" id="sysdate-04">URL 미연결</span>
+            </div>
+            <div class="sys-badge prep">준비 중</div>
+          </div>
+          <div class="sys-item" data-webapp="">
+            <div class="sys-status prep"></div>
+            <div class="sys-name-wrap">
+              <span class="sys-name">💰 RA 비용 관리</span>
+              <span class="sys-date" id="sysdate-05">URL 미연결</span>
+            </div>
+            <div class="sys-badge prep">준비 중</div>
+          </div>
+          <div class="sys-item" data-webapp="">
+            <div class="sys-status prep"></div>
+            <div class="sys-name-wrap">
+              <span class="sys-name">🌱 비건 인증 관리</span>
+              <span class="sys-date" id="sysdate-06">URL 미연결</span>
+            </div>
+            <div class="sys-badge prep">준비 중</div>
+          </div>
+          <div class="sys-item" data-webapp="">
+            <div class="sys-status prep"></div>
+            <div class="sys-name-wrap">
+              <span class="sys-name">🧪 포장재 상용성 시험</span>
+              <span class="sys-date" id="sysdate-07">URL 미연결</span>
+            </div>
+            <div class="sys-badge prep">준비 중</div>
+          </div>
+          <div class="sys-item" data-webapp="">
+            <div class="sys-status prep"></div>
+            <div class="sys-name-wrap">
+              <span class="sys-name">📌 QMS_08 예비</span>
+              <span class="sys-date" id="sysdate-08">URL 미연결</span>
+            </div>
+            <div class="sys-badge prep">준비 중</div>
+          </div>
+          <div class="sys-item" data-webapp="">
+            <div class="sys-status prep"></div>
+            <div class="sys-name-wrap">
+              <span class="sys-name">📌 QMS_09 예비</span>
+              <span class="sys-date" id="sysdate-09">URL 미연결</span>
+            </div>
+            <div class="sys-badge prep">준비 중</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+
+  <!-- ✦ 최하단 보안 푸터 ✦ -->
+  <div class="sec-footer">
+    🔒 <strong>MEDIPEEL 기밀 시스템 — 임직원 전용</strong><br>
+    본 시스템은 MEDIPEEL 품질관리팀 전용 내부 시스템입니다. 모든 접속 기록 및 활동이 보안 서버에 저장됩니다.<br>
+    무단 접근, 데이터 무단 복제·유출·공유는 사규 및 관련 법령(개인정보보호법, 영업비밀보호법 등)에 따라 엄중 처벌됩니다.<br>
+    <strong>MEDIPEEL Co., Ltd.</strong> &nbsp;·&nbsp; Quality Management Team &nbsp;·&nbsp; QMS v1.0
+  </div>
+
+  <!-- ── 계정 관리 모달 ── -->
+  <div class="modal-overlay" id="admin-modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div class="modal-head-icon">👤</div>
+        <div>
+          <div class="modal-head-title">계정 관리</div>
+          <div class="modal-head-sub">사용자 아이디 추가 · 비밀번호 변경 · 계정 삭제 (관리자 전용)</div>
+        </div>
+        <button class="modal-close" onclick="closeAdminModal()">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- 사용자 목록 -->
+        <div class="modal-section-title">등록된 계정</div>
+        <table class="user-table" id="user-table">
+          <thead>
+            <tr>
+              <th>아이디</th>
+              <th>이름</th>
+              <th>권한</th>
+              <th style="text-align:right">관리</th>
+            </tr>
+          </thead>
+          <tbody id="user-tbody"></tbody>
+        </table>
+
+        <!-- 신규 계정 추가 -->
+        <div class="modal-section-title">신규 계정 추가</div>
+        <div class="add-form">
+          <div class="add-form-grid">
+            <div class="af-group">
+              <label class="af-label" for="af-id">아이디</label>
+              <input class="af-input" id="af-id" type="text" placeholder="영문·숫자 조합">
+            </div>
+            <div class="af-group">
+              <label class="af-label" for="af-name">이름</label>
+              <input class="af-input" id="af-name" type="text" placeholder="표시 이름">
+            </div>
+            <div class="af-group">
+              <label class="af-label" for="af-pw">비밀번호</label>
+              <input class="af-input" id="af-pw" type="password" placeholder="비밀번호 설정">
+            </div>
+            <div class="af-group">
+              <label class="af-label" for="af-role">권한</label>
+              <select class="af-select" id="af-role">
+                <option value="user">일반 사용자</option>
+                <option value="admin">관리자</option>
+              </select>
+            </div>
+          </div>
+          <div class="af-footer">
+            <div class="af-msg" id="af-msg"></div>
+            <button class="btn-add-user" onclick="addUser()">+ 계정 추가</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-app -->
+
+<!-- ✦ 최하단 보안 배너 (로그인 화면용) ✦ -->
+<div class="sec-bar sec-bar-bottom" id="login-sec-bottom">
+  🔒 &nbsp;<strong>MEDIPEEL 기밀 시스템</strong> — 임직원 전용 · 모든 접속 기록 보관 · 무단 접근 시 법적 조치
+</div>
+
+<script>
+// ── 기본 계정 (최초 1회만 localStorage에 씀) ──
+const DEFAULT_ACCOUNTS = [
+  { id:'admin',   pw:'medipeel1!', name:'관리자',    initials:'관', role:'admin' },
+  { id:'quality', pw:'quality1!',  name:'품질관리팀', initials:'품', role:'user'  },
+  { id:'steve',   pw:'steve1!',    name:'Steve',     initials:'S',  role:'user'  },
+];
+const STORE_KEY = 'qms_accounts';
+
+function loadAccounts() {
+  const raw = localStorage.getItem(STORE_KEY);
+  if (raw) return JSON.parse(raw);
+  saveAccounts(DEFAULT_ACCOUNTS);
+  return DEFAULT_ACCOUNTS;
+}
+function saveAccounts(list) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(list));
+}
+function getInitials(name) {
+  if (!name) return '?';
+  const trimmed = name.trim();
+  // 한글이면 첫 글자, 영문이면 첫 글자 대문자
+  return /^[가-힣]/.test(trimmed) ? trimmed[0] : trimmed[0].toUpperCase();
+}
+
+let currentUser = null;
+let clockTimer  = null;
+
+// ── 로그인 ──
+function doLogin() {
+  const id  = document.getElementById('inp-id').value.trim();
+  const pw  = document.getElementById('inp-pw').value;
+  const err = document.getElementById('login-error');
+  const accounts = loadAccounts();
+  const acct = accounts.find(a => a.id === id && a.pw === pw);
+
+  if (acct) {
+    err.classList.remove('show');
+    currentUser = acct;
+    sessionStorage.setItem('qms_user', acct.id);
+    sessionStorage.setItem('qms_user_name', acct.name);
+    document.getElementById('user-name-display').textContent = acct.name;
+    document.getElementById('user-avatar').textContent       = acct.initials || getInitials(acct.name);
+    document.getElementById('login-screen').style.display    = 'none';
+    document.getElementById('login-sec-bottom').style.display= 'none';
+    document.getElementById('main-app').style.display        = 'flex';
+    // 관리자만 계정관리 버튼 노출
+    const btnAdmin = document.getElementById('btn-admin');
+    if (acct.role === 'admin') btnAdmin.classList.add('visible');
+    else                       btnAdmin.classList.remove('visible');
+    applyWatermark(acct.id);
+    startClock();
+    setHeroDate();
+  } else {
+    err.classList.add('show');
+    document.getElementById('inp-pw').value = '';
+    document.getElementById('inp-pw').focus();
+  }
+}
+
+// ── 로그아웃 ──
+function doLogout() {
+  currentUser = null;
+  sessionStorage.removeItem('qms_user');
+  sessionStorage.removeItem('qms_user_name');
+  document.getElementById('main-app').style.display         = 'none';
+  document.getElementById('login-screen').style.display     = 'flex';
+  document.getElementById('login-sec-bottom').style.display = 'block';
+  document.getElementById('inp-id').value = '';
+  document.getElementById('inp-pw').value = '';
+  document.getElementById('login-error').classList.remove('show');
+  document.getElementById('btn-admin').classList.remove('visible');
+  if (clockTimer) clearInterval(clockTimer);
+}
+
+// ── 시계 / 날짜 ──
+function startClock() {
+  function tick() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      [now.getHours(), now.getMinutes(), now.getSeconds()]
+        .map(n => String(n).padStart(2,'0')).join(':');
+  }
+  tick();
+  clockTimer = setInterval(tick, 1000);
+}
+function setHeroDate() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const d = String(now.getDate()).padStart(2,'0');
+  document.getElementById('hero-date').textContent = `${y}.${m}.${d}`;
+}
+
+// ── 계정 관리 모달 ──
+function openAdminModal() {
+  renderUserTable();
+  document.getElementById('admin-modal').classList.add('open');
+}
+function closeAdminModal() {
+  document.getElementById('admin-modal').classList.remove('open');
+  clearAddForm();
+}
+// 모달 바깥 클릭 시 닫기
+document.getElementById('admin-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAdminModal();
+});
+
+function renderUserTable() {
+  const accounts = loadAccounts();
+  const tbody = document.getElementById('user-tbody');
+  tbody.innerHTML = '';
+  accounts.forEach((acct, idx) => {
+    const isMe = currentUser && acct.id === currentUser.id;
+    const initials = acct.initials || getInitials(acct.name);
+    const avatarClass = acct.role === 'admin' ? '' : ' gray';
+    const roleBadge = acct.role === 'admin'
+      ? '<span class="role-badge admin">관리자</span>'
+      : '<span class="role-badge user">일반</span>';
+    const deleteBtn = isMe || acct.id === 'admin'
+      ? '' // 자기 자신 및 admin 계정 삭제 불가
+      : `<button class="tbl-btn del" onclick="deleteUser('${acct.id}')">삭제</button>`;
+
+    tbody.innerHTML += `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:9px">
+            <div class="u-avatar${avatarClass}">${initials}</div>
+            <span class="u-id">${acct.id}</span>
+            ${isMe ? '<span style="font-size:10px;color:var(--text3)">(나)</span>' : ''}
+          </div>
+        </td>
+        <td class="u-name">${acct.name}</td>
+        <td>${roleBadge}</td>
+        <td style="text-align:right">
+          <button class="tbl-btn" onclick="togglePwRow('${acct.id}')">비밀번호 변경</button>
+          ${deleteBtn}
+        </td>
+      </tr>
+      <tr id="pw-row-${acct.id}">
+        <td colspan="4" style="padding:0 12px 10px">
+          <div class="pw-change-row" id="pw-change-${acct.id}">
+            <input class="af-input" id="pw-new-${acct.id}" type="password" placeholder="새 비밀번호" style="flex:1">
+            <button class="btn-pw-save" onclick="savePw('${acct.id}')">저장</button>
+            <button class="btn-pw-cancel" onclick="togglePwRow('${acct.id}')">취소</button>
+            <span class="af-msg" id="pw-msg-${acct.id}" style="font-size:12px;margin-left:4px"></span>
+          </div>
+        </td>
+      </tr>`;
+  });
+}
+
+function togglePwRow(uid) {
+  const row = document.getElementById(`pw-change-${uid}`);
+  const isOpen = row.classList.contains('open');
+  // 다른 열려있는 것 모두 닫기
+  document.querySelectorAll('.pw-change-row.open').forEach(r => r.classList.remove('open'));
+  if (!isOpen) row.classList.add('open');
+}
+
+function savePw(uid) {
+  const newPw = document.getElementById(`pw-new-${uid}`).value;
+  const msg   = document.getElementById(`pw-msg-${uid}`);
+  if (!newPw || newPw.length < 4) {
+    msg.className = 'af-msg err';
+    msg.textContent = '4자 이상 입력하세요';
+    return;
+  }
+  const accounts = loadAccounts();
+  const acct = accounts.find(a => a.id === uid);
+  if (acct) {
+    acct.pw = newPw;
+    // 현재 로그인 유저라면 세션 정보도 갱신
+    if (currentUser && currentUser.id === uid) currentUser.pw = newPw;
+    saveAccounts(accounts);
+    msg.className = 'af-msg ok';
+    msg.textContent = '변경 완료!';
+    setTimeout(() => { document.getElementById(`pw-change-${uid}`).classList.remove('open'); }, 1200);
+  }
+}
+
+function deleteUser(uid) {
+  if (!confirm(`'${uid}' 계정을 삭제하시겠습니까?`)) return;
+  const accounts = loadAccounts().filter(a => a.id !== uid);
+  saveAccounts(accounts);
+  renderUserTable();
+}
+
+function addUser() {
+  const id   = document.getElementById('af-id').value.trim();
+  const name = document.getElementById('af-name').value.trim();
+  const pw   = document.getElementById('af-pw').value;
+  const role = document.getElementById('af-role').value;
+  const msg  = document.getElementById('af-msg');
+
+  if (!id || !name || !pw) {
+    msg.className = 'af-msg err';
+    msg.textContent = '아이디, 이름, 비밀번호를 모두 입력하세요.';
+    return;
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(id)) {
+    msg.className = 'af-msg err';
+    msg.textContent = '아이디는 영문·숫자·_만 사용 가능합니다.';
+    return;
+  }
+  if (pw.length < 4) {
+    msg.className = 'af-msg err';
+    msg.textContent = '비밀번호는 4자 이상이어야 합니다.';
+    return;
+  }
+  const accounts = loadAccounts();
+  if (accounts.find(a => a.id === id)) {
+    msg.className = 'af-msg err';
+    msg.textContent = '이미 존재하는 아이디입니다.';
+    return;
+  }
+  accounts.push({ id, pw, name, initials: getInitials(name), role });
+  saveAccounts(accounts);
+  msg.className = 'af-msg ok';
+  msg.textContent = `'${id}' 계정이 추가되었습니다.`;
+  clearAddForm(false);
+  renderUserTable();
+  setTimeout(() => { msg.textContent = ''; }, 2500);
+}
+
+function clearAddForm(clearMsg = true) {
+  ['af-id','af-name','af-pw'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('af-role').value = 'user';
+  if (clearMsg) document.getElementById('af-msg').textContent = '';
+}
+
+// ── Enter 키 로그인 ──
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const ls = document.getElementById('login-screen');
+    if (ls.style.display !== 'none') doLogin();
+  }
+});
+
+// ── 모듈 최근 업데이트 일시 조회 ──
+async function loadModuleLastUpdated() {
+  const items = document.querySelectorAll('.sys-item[data-webapp]');
+  const fetches = [...items].map(async item => {
+    const url     = item.getAttribute('data-webapp');
+    const dateEl  = item.querySelector('.sys-date');
+    if (!dateEl) return;
+    if (!url) { dateEl.textContent = '연결 예정'; return; }
+    try {
+      const res  = await fetch(`${url}?action=getInfo&t=${Date.now()}`);
+      const json = await res.json();
+      if (json.lastModified) {
+        dateEl.textContent = '최근 업데이트: ' + json.lastModified;
+        dateEl.classList.add('loaded');
+      } else {
+        dateEl.textContent = '정보 없음';
+      }
+    } catch(e) {
+      dateEl.textContent = '조회 실패';
+      dateEl.classList.add('err');
+    }
+  });
+  await Promise.all(fetches);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadModuleLastUpdated();
+});
+
+// ── 메모장 ──
+(function() {
+  const MEMO_KEY = 'qms_dashboard_memo';
+  const ta       = document.getElementById('qms-memo');
+  const saved    = document.getElementById('memo-saved');
+  if (!ta) return;
+
+  ta.value = localStorage.getItem(MEMO_KEY) || '';
+
+  ta.addEventListener('dblclick', e => {
+    e.stopPropagation();
+    ta.readOnly = false;
+    ta.style.cursor = 'text';
+    ta.focus();
+  });
+
+  ta.addEventListener('blur', () => {
+    ta.readOnly = true;
+    ta.style.cursor = 'default';
+  });
+
+  let saveTimer;
+  ta.addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      localStorage.setItem(MEMO_KEY, ta.value);
+      saved.classList.add('show');
+      setTimeout(() => saved.classList.remove('show'), 1500);
+    }, 800);
+  });
+})();
+</script>
+
+<!-- ── 보안 워터마크 + IP 표시 ── -->
+<script>
+/* IP 조회 */
+fetch('https://api.ipify.org?format=json')
+  .then(r => r.json())
+  .then(d => {
+    const el = document.getElementById('sec-ip-val');
+    if (el) el.textContent = d.ip;
+  })
+  .catch(() => {
+    const el = document.getElementById('sec-ip-val');
+    if (el) el.textContent = '확인 불가';
+  });
+
+function applyWatermark(userId) {
+  const text = userId + ' - 대외비';
+  const canvas = document.createElement('canvas');
+  canvas.width = 360; canvas.height = 190;
+  const ctx = canvas.getContext('2d');
+  ctx.save();
+  ctx.translate(180, 95);
+  ctx.rotate(-30 * Math.PI / 180);
+  ctx.font = '600 14px "Apple SD Gothic Neo","Malgun Gothic",sans-serif';
+  ctx.fillStyle = 'rgba(60,60,90,0.09)';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 0, 0);
+  ctx.restore();
+  const existing = document.getElementById('wm-overlay');
+  if (existing) existing.remove();
+  const div = document.createElement('div');
+  div.id = 'wm-overlay';
+  div.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9998;background-image:url('+canvas.toDataURL()+');background-repeat:repeat;';
+  document.body.appendChild(div);
+}
+</script>
+</body>
+</html>
