@@ -912,36 +912,62 @@ function openDocLinksForRow(rowIndex) {
   if (!r) return;
   const links = getDocLinks(r);
   if (!links.length) return;
-  openDocLinksModal(links, r['품명'] || '');
+  openDocLinksWindow(links, r['품명'] || '');
 }
 
-// 링크 클릭 → 파일 다운로드
-function downloadFile(url) {
-  const a = document.createElement('a');
-  a.href = url.trim();
-  a.download = '';
-  a.target = '_blank';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
+// 첨부파일 → 새 팝업 윈도우
+function openDocLinksWindow(links, pname) {
+  const title = (pname ? pname + ' ' : '') + '첨부파일';
+  const itemsHtml = links.map((l, i) => {
+    const url = (l || '').trim();
+    const label = url.length > 60 ? url.slice(0, 57) + '...' : url;
+    return `<a href="${url.replace(/"/g,'&quot;')}" download target="_blank"
+      style="display:flex;align-items:center;gap:10px;padding:12px 16px;
+             background:#f4f7ff;border:1px solid #dbeafe;border-radius:9px;
+             text-decoration:none;color:#1d4ed8;transition:background .15s;"
+      onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#f4f7ff'">
+      <span style="min-width:24px;height:24px;border-radius:50%;background:#2e5fe8;color:#fff;
+                   font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;">${i + 1}</span>
+      <span style="font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${url.replace(/"/g,'&quot;')}">${label}</span>
+      <span style="font-size:13px;color:#93c5fd;">↗</span>
+    </a>`;
+  }).join('');
 
-// 첨부파일 팝업
-function openDocLinksModal(links, pname) {
-  document.getElementById('doclinks-title').textContent = `첨부파일 ${links.length > 1 ? links.length + '개' : ''}`;
-  document.getElementById('doclinks-sub').textContent   = pname || '';
-  // 링크 목록 렌더링 — 인덱스로 참조하여 onclick 특수문자 문제 회피
-  window._docModalLinks = links;
-  document.getElementById('doclinks-body').innerHTML = links.map((l, i) => `
-    <div class="doclink-item" onclick="downloadFile(window._docModalLinks[${i}])" style="cursor:pointer">
-      <span class="doclink-num">${i + 1}</span>
-      <span class="doclink-url" title="${esc((l||'').trim())}">${esc((l||'').trim())}</span>
-      <span class="doclink-arrow">↗</span>
-    </div>`).join('');
-  document.getElementById('doclinks-modal').classList.add('open');
-}
-function closeDocLinksModal() {
-  document.getElementById('doclinks-modal').classList.remove('open');
+  const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+<title>${title}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Pretendard','Noto Sans KR',sans-serif;background:#f0f4ff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  .box{background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(46,95,232,.18);overflow:hidden;width:540px;max-width:100%}
+  .head{background:linear-gradient(135deg,#2e5fe8,#1e40af);padding:18px 22px;display:flex;align-items:center;gap:10px}
+  .head-icon{font-size:20px}
+  .head-title{color:#fff;font-size:15px;font-weight:700;flex:1}
+  .head-sub{color:rgba(255,255,255,.75);font-size:11px;margin-top:2px}
+  .body{padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+  .foot{padding:12px 20px;text-align:right;border-top:1px solid #e5e7eb}
+  .btn-close{padding:7px 20px;background:#6b7280;color:#fff;border:none;border-radius:7px;font-size:13px;cursor:pointer;border-radius:7px}
+  .btn-close:hover{background:#4b5563}
+</style></head><body>
+<div class="box">
+  <div class="head">
+    <span class="head-icon">📎</span>
+    <div>
+      <div class="head-title">첨부파일 ${links.length > 1 ? links.length + '개' : ''}</div>
+      ${pname ? `<div class="head-sub">${pname}</div>` : ''}
+    </div>
+  </div>
+  <div class="body">${itemsHtml}</div>
+  <div class="foot"><button class="btn-close" onclick="window.close()">닫기</button></div>
+</div>
+</body></html>`;
+
+  const w = window.open('', '_blank', 'width=580,height=' + Math.min(120 + links.length * 70, 600) + ',scrollbars=yes,resizable=yes,toolbar=no,menubar=no');
+  if (!w) { alert('팝업이 차단되었습니다.\n브라우저 팝업 허용 후 다시 시도해 주세요.'); return; }
+  setTimeout(function() {
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  }, 80);
 }
 
 function renderTable(rows) {
