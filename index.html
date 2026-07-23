@@ -472,16 +472,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .menu-card {
   background:var(--bg2);
   border:1px solid var(--border);
-  border-radius:16px;
-  padding:28px 30px;
+  border-radius:14px;
+  padding:16px 18px;
   cursor:pointer;
   text-decoration:none;
   color:inherit;
-  display:block;
+  display:flex;
+  flex-direction:column;
   position:relative;
   overflow:hidden;
   transition:transform .18s, box-shadow .18s, border-color .18s;
   box-shadow:var(--shadow2);
+  height:170px;
 }
 .menu-card:hover {
   transform:translateY(-3px);
@@ -503,15 +505,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .menu-card.c6::before { background:linear-gradient(90deg,#16a34a,#4ade80); }
 .menu-card.c7::before { background:linear-gradient(90deg,#7c3aed,#c084fc); }
 
-.menu-card-head { display:flex; align-items:flex-start; gap:16px; margin-bottom:16px; }
+.menu-card-head { display:flex; align-items:center; gap:12px; margin-bottom:9px; }
 .menu-icon {
-  width:48px;
-  height:48px;
-  border-radius:13px;
+  width:36px;
+  height:36px;
+  border-radius:10px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:22px;
+  font-size:17px;
   flex-shrink:0;
 }
 .menu-card.c1 .menu-icon { background:rgba(200,16,46,.08); }
@@ -525,17 +527,20 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .menu-card.c8 .menu-icon { background:rgba(100,116,139,.10); }
 
 .menu-card-num {
-  font-size:10px;
+  font-size:9px;
   font-weight:700;
   color:var(--text3);
   letter-spacing:.08em;
   text-transform:uppercase;
-  margin-bottom:4px;
+  margin-bottom:3px;
 }
-.menu-card-title { font-size:15px; font-weight:700; color:var(--text); letter-spacing:-.01em; line-height:1.3; }
-.menu-card-desc { font-size:12px; color:var(--text2); line-height:1.65; margin-bottom:18px; }
-.menu-card-tags { display:flex; flex-wrap:wrap; gap:6px; }
-.tag { font-size:10px; font-weight:600; padding:2px 9px; border-radius:5px; letter-spacing:.02em; }
+.menu-card-title { font-size:13px; font-weight:700; color:var(--text); letter-spacing:-.01em; line-height:1.3; }
+.menu-card-desc {
+  font-size:11px; color:var(--text2); line-height:1.55; margin-bottom:10px; flex:1;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.menu-card-tags { display:flex; flex-wrap:wrap; gap:5px; }
+.tag { font-size:9px; font-weight:600; padding:2px 7px; border-radius:4px; letter-spacing:.02em; }
 .tag.red    { background:rgba(224,60,60,.08);  color:#c0202f; }
 .tag.blue   { background:rgba(46,95,232,.08);  color:#1a4acc; }
 .tag.green  { background:rgba(14,169,126,.08); color:#077a5a; }
@@ -544,31 +549,33 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 .menu-card-arrow {
   position:absolute;
-  bottom:22px;right:22px;
-  width:28px;height:28px;
-  border-radius:8px;
+  bottom:14px;right:14px;
+  width:22px;height:22px;
+  border-radius:6px;
   background:var(--bg3);
   display:flex;align-items:center;justify-content:center;
-  font-size:14px;color:var(--text3);
+  font-size:11px;color:var(--text3);
   transition:background .15s, color .15s;
 }
 .menu-card:hover .menu-card-arrow { background:var(--brand); color:#fff; }
 
 .wip-badge {
   position:absolute;
-  top:18px;right:18px;
-  font-size:10px;font-weight:700;
+  top:12px;right:12px;
+  font-size:9px;font-weight:700;
   color:var(--amber);
   background:rgba(217,139,16,.10);
   border:1px solid rgba(217,139,16,.20);
   border-radius:5px;padding:2px 8px;
   letter-spacing:.04em;
 }
+/* 링크 연결된 슬롯(inactive 아닌 카드)은 준비 중 뱃지 자동 숨김 */
+.menu-card:not(.inactive) .wip-badge { display:none; }
 
 /* ── 비활성 카드 (개발 예정) ── */
 .menu-card.inactive {
   filter:grayscale(1);
-  opacity:.38;
+  opacity:.19;
   pointer-events:none;
   cursor:default;
   box-shadow:none;
@@ -586,7 +593,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 
 /* Info row */
-.info-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.info-row { display:grid; grid-template-columns:1fr; gap:16px; }
 .info-card {
   background:var(--bg2);
   border:1px solid var(--border);
@@ -610,7 +617,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .memo-textarea {
   flex:1; width:100%; border:none; background:transparent; resize:none;
   font-size:13px; color:var(--text); line-height:1.7; font-family:var(--font);
-  outline:none; cursor:default; min-height:130px; padding:4px 2px;
+  outline:none; cursor:default; min-height:78px; padding:4px 2px;
 }
 .memo-textarea::placeholder { color:#b8bdd4; font-style:italic; }
 .memo-footer { display:flex; align-items:center; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px dashed #e4e8f2; }
@@ -880,7 +887,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <!-- ✦ 최상단 보안 배너 ✦ -->
 <div class="sec-bar">
   <span class="sec-icon">🔒</span>
-  <span><strong>MEDIPEEL 기밀 시스템</strong> — 임직원 전용 · 모든 접속 및 활동이 기록됩니다.</span>
+  <span><strong>MEDIPEEL 대외비 시스템</strong> — 임직원 전용 · 모든 접속 및 활동이 기록됩니다.</span>
   <span class="sec-sep"></span>
   <span>무단 접근 · 정보 유출 시 사규 및 관련 법령에 따라 엄중 처벌됩니다.</span>
   <div class="sec-right">
@@ -971,7 +978,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         </div>
         <div class="hero-stats">
           <div class="hero-stat">
-            <div class="hero-stat-val">4 <span>개 모듈</span></div>
+            <div class="hero-stat-val">10 <span>개 세션</span></div>
             <div class="hero-stat-lbl">운영 중</div>
           </div>
           <div class="hero-stat">
@@ -989,18 +996,120 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <!-- Menu section -->
     <div class="section-header">
       <div class="section-title">메뉴</div>
-      <div class="section-count">4개 모듈</div>
+      <div class="section-count">10개 세션</div>
     </div>
 
     <div class="menu-grid">
 
-      <!-- 1. 클레임 접수/처리 -->
-      <a class="menu-card c1" href="claim/index.html">
+      <!-- 슬롯 01 — RA_PMS 신규 등록 관리 -->
+      <a class="menu-card c2" href="https://medipeel-ra-progress.netlify.app/" target="_blank" rel="noopener noreferrer" data-module="QMS_01">
         <div class="menu-card-head">
           <div class="menu-icon">📋</div>
           <div class="menu-card-info">
             <div class="menu-card-num">QMS_01</div>
-            <div class="menu-card-title">클레임 접수 / 처리 업무</div>
+            <div class="menu-card-title">RA_PMS (Progress Management System)<br>신규 등록 관리 세션</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">
+          글로벌 인허가(RA) 업무의 전체 라이프사이클을 추적합니다.
+          품목별 × 인증종류별 진행 단계, 목표 대비 수행률을 관리합니다.
+        </div>
+        <div class="menu-card-tags">
+          <span class="tag amber">태스크 관리</span>
+          <span class="tag amber">일정 관리</span>
+          <span class="tag gray">간트차트</span>
+          <span class="tag gray">블로커 추적</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+      </a>
+
+      <!-- 슬롯 02 — RA_Ai 에이전트 (Deskroom) -->
+      <a class="menu-card c7" href="https://app.deskroom.so/auth/login" target="_blank" rel="noopener noreferrer" data-module="QMS_10">
+        <div class="menu-card-head">
+          <div class="menu-icon">🤖</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_02</div>
+            <div class="menu-card-title"><span style="display:inline-flex;align-items:center;gap:4px;">RA_Ai 에이전트 (By <img src="images/deskroom_rogo.jpg" alt="Deskroom" style="height:28px;width:auto;object-fit:contain;vertical-align:middle;border-radius:2px;">)</span><br>자사 전용 챗봇 세션</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">자사 전용 RA AI 챗봇 서비스입니다. 인허가 관련 질의응답 및 규제 정보를 AI로 지원합니다.</div>
+        <div class="menu-card-tags">
+          <span class="tag blue">AI 챗봇</span>
+          <span class="tag blue">RA 지원</span>
+          <span class="tag gray">규제 정보</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+        <div class="wip-badge">준비 중</div>
+      </a>
+
+      <!-- 슬롯 03 — RA 인허가 완료 현황 -->
+      <a class="menu-card c6" href="https://medipeel-ra.netlify.app/" target="_blank" rel="noopener noreferrer" data-module="QMS_02">
+        <div class="menu-card-head">
+          <div class="menu-icon">🌐</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_03</div>
+            <div class="menu-card-title">RA_인허가 완료 현황 세션</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">
+          해외 인증 완료 현황 및 신규 등록 로드맵을 관리합니다. 성분 규제에 따른 제품 리뉴얼 대응 현황을 추적합니다.
+        </div>
+        <div class="menu-card-tags">
+          <span class="tag blue">해외 인증</span>
+          <span class="tag blue">등록 로드맵</span>
+          <span class="tag amber">성분 규제</span>
+          <span class="tag gray">리뉴얼 대응</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+        <div class="wip-badge">준비 중</div>
+      </a>
+
+      <!-- 슬롯 04 — RA 비용 관리 -->
+      <a class="menu-card c4" href="Cost/index.html" data-module="QMS_03">
+        <div class="menu-card-head">
+          <div class="menu-icon">💰</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_04</div>
+            <div class="menu-card-title">RA_비용 관리 세션</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">
+          RA 대행사별 비용을 태스크 단위로 추적합니다.
+          품의서·지급상태·지출결의서를 통합 관리합니다.
+        </div>
+        <div class="menu-card-tags">
+          <span class="tag" style="background:#ede9fe;color:#5b21b6">대행사 비용</span>
+          <span class="tag" style="background:#fef9c3;color:#854d0e">품의/지급</span>
+          <span class="tag gray">지출결의서</span>
+          <span class="tag gray">비용 추적</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+      </a>
+
+      <!-- 슬롯 05 — RA 대행사 계약 관리 -->
+      <a class="menu-card c3" href="contract/index.html" data-module="QMS_09">
+        <div class="menu-card-head">
+          <div class="menu-icon">📝</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_05</div>
+            <div class="menu-card-title">RA_대행사 계약 관리 세션</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">대행사 계약 현황 및 관련 문서를 관리합니다.</div>
+        <div class="menu-card-tags">
+          <span class="tag blue">계약</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+        <div class="wip-badge">준비 중</div>
+      </a>
+
+      <!-- 슬롯 06 — 클레임 접수/처리 -->
+      <a class="menu-card c1" href="claim/index.html" data-module="QMS_04">
+        <div class="menu-card-head">
+          <div class="menu-icon">📋</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_06</div>
+            <div class="menu-card-title">클레임 관련 세션</div>
           </div>
         </div>
         <div class="menu-card-desc">
@@ -1016,13 +1125,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="menu-card-arrow">→</div>
       </a>
 
-      <!-- 2. 품질관리 일반 지표 -->
-      <a class="menu-card c2" href="quality/index.html">
+      <!-- 슬롯 07 — 품질관리 일반 지표 -->
+      <a class="menu-card c2" href="quality/index.html" data-module="QMS_05">
         <div class="menu-card-head">
           <div class="menu-icon">📊</div>
           <div class="menu-card-info">
-            <div class="menu-card-num">QMS_02</div>
-            <div class="menu-card-title">품질관리 일반 지표</div>
+            <div class="menu-card-num">QMS_07</div>
+            <div class="menu-card-title">품질관리 일반 지표 세션</div>
           </div>
         </div>
         <div class="menu-card-desc">
@@ -1038,12 +1147,34 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="menu-card-arrow">→</div>
       </a>
 
-      <!-- 3. 글로벌 환경마크 -->
-      <a class="menu-card c3 inactive" href="ecomark/index.html">
+      <!-- 슬롯 08 — 포장재 상용성 시험 관리 -->
+      <a class="menu-card c4" href="CT_Test/index.html" data-module="QMS_07">
+        <div class="menu-card-head">
+          <div class="menu-icon">🧪</div>
+          <div class="menu-card-info">
+            <div class="menu-card-num">QMS_08</div>
+            <div class="menu-card-title">포장재 상용성 시험 관리 세션</div>
+          </div>
+        </div>
+        <div class="menu-card-desc">
+          포장재 상용성 시험 결과를 품목별로 관리합니다.
+          시험 항목별 적합·부적합 현황 및 이력을 추적합니다.
+        </div>
+        <div class="menu-card-tags">
+          <span class="tag" style="background:#ede9fe;color:#6d28d9">상용성 시험</span>
+          <span class="tag" style="background:#ede9fe;color:#6d28d9">적합 판정</span>
+          <span class="tag gray">시험 이력</span>
+          <span class="tag gray">품목 관리</span>
+        </div>
+        <div class="menu-card-arrow">→</div>
+      </a>
+
+      <!-- 슬롯 09 — 글로벌 환경마크 -->
+      <a class="menu-card c3" href="E_mark/index.html" data-module="QMS_06">
         <div class="menu-card-head">
           <div class="menu-icon">🌿</div>
           <div class="menu-card-info">
-            <div class="menu-card-num">QMS_03</div>
+            <div class="menu-card-num">QMS_09</div>
             <div class="menu-card-title">글로벌 환경마크 세션</div>
           </div>
         </div>
@@ -1058,233 +1189,65 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           <span class="tag gray">국가별 현황</span>
         </div>
         <div class="menu-card-arrow">→</div>
+        <div class="wip-badge">준비 중</div>
       </a>
 
-      <!-- 4. 협력업체 평가 -->
-      <a class="menu-card c4 inactive" href="supplier/index.html">
+      <!-- 슬롯 10 — Clinical Study Report -->
+      <a class="menu-card c5" href="Clinical Test/index.html" data-module="QMS_11">
         <div class="menu-card-head">
-          <div class="menu-icon">🤝</div>
+          <div class="menu-icon">🔬</div>
           <div class="menu-card-info">
-            <div class="menu-card-num">QMS_04</div>
-            <div class="menu-card-title">협력업체 평가</div>
+            <div class="menu-card-num">QMS_10</div>
+            <div class="menu-card-title">CSR (Clinical Study Report) 세션</div>
           </div>
         </div>
-        <div class="menu-card-desc">
-          협력업체 품질 평가 결과를 주기적으로 관리합니다.
-          평가 항목별 점수, 등급 분류, 개선 요청 현황을 추적합니다.
-        </div>
+        <div class="menu-card-desc">임상 시험 보고서 현황 및 관련 문서를 통합 관리합니다.</div>
         <div class="menu-card-tags">
-          <span class="tag amber">업체 평가</span>
-          <span class="tag amber">등급 관리</span>
-          <span class="tag gray">개선 요청</span>
-          <span class="tag gray">이력 추적</span>
+          <span class="tag blue">임상 시험</span>
+          <span class="tag gray">CSR</span>
         </div>
         <div class="menu-card-arrow">→</div>
         <div class="wip-badge">준비 중</div>
       </a>
 
-      <!-- 5. RA 비용 관리 -->
-      <a class="menu-card c5 inactive" href="ra/index.html">
-        <div class="menu-card-head">
-          <div class="menu-icon">💰</div>
-          <div class="menu-card-info">
-            <div class="menu-card-num">QMS_05</div>
-            <div class="menu-card-title">RA 비용 관리</div>
-          </div>
-        </div>
-        <div class="menu-card-desc">
-          Regulatory Affairs 관련 비용을 항목별로 관리합니다.
-          인증·등록·검사 비용 현황 및 예산 대비 집행 현황을 추적합니다.
-        </div>
-        <div class="menu-card-tags">
-          <span class="tag" style="background:#e0f2fe;color:#0369a1">인증비용</span>
-          <span class="tag" style="background:#e0f2fe;color:#0369a1">등록비</span>
-          <span class="tag gray">예산 관리</span>
-          <span class="tag gray">집행 현황</span>
-        </div>
-        <div class="menu-card-arrow">→</div>
-        <div class="wip-badge">준비 중</div>
-      </a>
-
-      <!-- 6. 비건 인증 관리 -->
-      <a class="menu-card c6 inactive" href="vegan/index.html">
-        <div class="menu-card-head">
-          <div class="menu-icon">🌱</div>
-          <div class="menu-card-info">
-            <div class="menu-card-num">QMS_06</div>
-            <div class="menu-card-title">비건 인증 관리</div>
-          </div>
-        </div>
-        <div class="menu-card-desc">
-          비건 인증 현황 및 갱신 일정을 관리합니다.
-          인증 기관별·제품별 취득 현황과 만료 일정을 추적합니다.
-        </div>
-        <div class="menu-card-tags">
-          <span class="tag" style="background:#dcfce7;color:#15803d">비건 인증</span>
-          <span class="tag" style="background:#dcfce7;color:#15803d">갱신 관리</span>
-          <span class="tag gray">인증 기관</span>
-          <span class="tag gray">만료 알림</span>
-        </div>
-        <div class="menu-card-arrow">→</div>
-        <div class="wip-badge">준비 중</div>
-      </a>
-
-      <!-- 7. 포장재 상용성 시험 관리 -->
-      <a class="menu-card c7 inactive" href="packaging/index.html">
-        <div class="menu-card-head">
-          <div class="menu-icon">🧪</div>
-          <div class="menu-card-info">
-            <div class="menu-card-num">QMS_07</div>
-            <div class="menu-card-title">포장재 상용성 시험 관리</div>
-          </div>
-        </div>
-        <div class="menu-card-desc">
-          포장재 상용성 시험 결과를 품목별로 관리합니다.
-          시험 항목별 적합·부적합 현황 및 이력을 추적합니다.
-        </div>
-        <div class="menu-card-tags">
-          <span class="tag" style="background:#ede9fe;color:#6d28d9">상용성 시험</span>
-          <span class="tag" style="background:#ede9fe;color:#6d28d9">적합 판정</span>
-          <span class="tag gray">시험 이력</span>
-          <span class="tag gray">품목 관리</span>
-        </div>
-        <div class="menu-card-arrow">→</div>
-        <div class="wip-badge">준비 중</div>
-      </a>
-
-      <!-- 8. 예비 -->
+      <!-- 슬롯 11 — 예비 -->
       <a class="menu-card c8 inactive" href="#">
         <div class="menu-card-head">
           <div class="menu-icon">📌</div>
           <div class="menu-card-info">
-            <div class="menu-card-num">QMS_08</div>
-            <div class="menu-card-title">예비</div>
+            <div class="menu-card-num">QMS_11</div>
+            <div class="menu-card-title">예비 세션</div>
           </div>
         </div>
         <div class="menu-card-desc">추후 운영 모듈로 활용될 예비 슬롯입니다.</div>
-        <div class="menu-card-tags">
-          <span class="tag gray">미정</span>
-        </div>
+        <div class="menu-card-tags"><span class="tag gray">미정</span></div>
         <div class="menu-card-arrow">→</div>
         <div class="wip-badge">준비 중</div>
       </a>
 
-      <!-- 9. 예비 -->
+      <!-- 슬롯 12 — 예비 -->
       <a class="menu-card c8 inactive" href="#">
         <div class="menu-card-head">
           <div class="menu-icon">📌</div>
           <div class="menu-card-info">
-            <div class="menu-card-num">QMS_09</div>
-            <div class="menu-card-title">예비</div>
+            <div class="menu-card-num">QMS_12</div>
+            <div class="menu-card-title">예비 세션</div>
           </div>
         </div>
         <div class="menu-card-desc">추후 운영 모듈로 활용될 예비 슬롯입니다.</div>
-        <div class="menu-card-tags">
-          <span class="tag gray">미정</span>
-        </div>
+        <div class="menu-card-tags"><span class="tag gray">미정</span></div>
         <div class="menu-card-arrow">→</div>
         <div class="wip-badge">준비 중</div>
       </a>
 
     </div>
 
-    <!-- Info row -->
-    <div class="info-row">
-      <div class="info-card">
-        <div class="info-card-title">📝 메모</div>
-        <div class="memo-wrap">
-          <textarea class="memo-textarea" id="qms-memo" placeholder="더블클릭하여 메모를 입력하세요…" readonly></textarea>
-          <div class="memo-footer">
-            <span class="memo-hint">더블클릭 → 편집 · 포커스 해제 → 자동 저장</span>
-            <span class="memo-saved" id="memo-saved">저장됨 ✓</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="info-card">
-        <div class="info-card-title">모듈 운영 상태</div>
-        <div class="sys-list">
-          <div class="sys-item" data-webapp="https://script.google.com/macros/s/AKfycbxN2bX9X2_iEjYAN3WWrZtW9NvF9--R2KLSMIPN3Rw4j7cXOBTGcGxnZrrdJ9fXbgD1/exec">
-            <div class="sys-status on"></div>
-            <div class="sys-name-wrap">
-              <span class="sys-name">📋 클레임 접수/처리 업무</span>
-              <span class="sys-date" id="sysdate-01">확인 중...</span>
-            </div>
-            <div class="sys-badge on">운영</div>
-          </div>
-          <div class="sys-item" data-webapp="">
-            <div class="sys-status on"></div>
-            <div class="sys-name-wrap">
-              <span class="sys-name">📊 품질관리 일반 지표</span>
-              <span class="sys-date" id="sysdate-02">URL 미연결</span>
-            </div>
-            <div class="sys-badge on">운영</div>
-          </div>
-          <div class="sys-item" data-webapp="">
-            <div class="sys-status on"></div>
-            <div class="sys-name-wrap">
-              <span class="sys-name">🌿 글로벌 환경마크</span>
-              <span class="sys-date" id="sysdate-03">URL 미연결</span>
-            </div>
-            <div class="sys-badge on">운영</div>
-          </div>
-          <div class="sys-item" data-webapp="">
-            <div class="sys-status prep"></div>
-            <div class="sys-name-wrap">
-              <span class="sys-name">🤝 협력업체 평가</span>
-              <span class="sys-date" id="sysdate-04">URL 미연결</span>
-            </div>
-            <div class="sys-badge prep">준비 중</div>
-          </div>
-          <div class="sys-item" data-webapp="">
-            <div class="sys-status prep"></div>
-            <div class="sys-name-wrap">
-              <span class="sys-name">💰 RA 비용 관리</span>
-              <span class="sys-date" id="sysdate-05">URL 미연결</span>
-            </div>
-            <div class="sys-badge prep">준비 중</div>
-          </div>
-          <div class="sys-item" data-webapp="">
-            <div class="sys-status prep"></div>
-            <div class="sys-name-wrap">
-              <span class="sys-name">🌱 비건 인증 관리</span>
-              <span class="sys-date" id="sysdate-06">URL 미연결</span>
-            </div>
-            <div class="sys-badge prep">준비 중</div>
-          </div>
-          <div class="sys-item" data-webapp="">
-            <div class="sys-status prep"></div>
-            <div class="sys-name-wrap">
-              <span class="sys-name">🧪 포장재 상용성 시험</span>
-              <span class="sys-date" id="sysdate-07">URL 미연결</span>
-            </div>
-            <div class="sys-badge prep">준비 중</div>
-          </div>
-          <div class="sys-item" data-webapp="">
-            <div class="sys-status prep"></div>
-            <div class="sys-name-wrap">
-              <span class="sys-name">📌 QMS_08 예비</span>
-              <span class="sys-date" id="sysdate-08">URL 미연결</span>
-            </div>
-            <div class="sys-badge prep">준비 중</div>
-          </div>
-          <div class="sys-item" data-webapp="">
-            <div class="sys-status prep"></div>
-            <div class="sys-name-wrap">
-              <span class="sys-name">📌 QMS_09 예비</span>
-              <span class="sys-date" id="sysdate-09">URL 미연결</span>
-            </div>
-            <div class="sys-badge prep">준비 중</div>
-          </div>
-        </div>
-      </div>
-    </div>
 
   </div><!-- /main-content -->
 
   <!-- ✦ 최하단 보안 푸터 ✦ -->
   <div class="sec-footer">
-    🔒 <strong>MEDIPEEL 기밀 시스템 — 임직원 전용</strong><br>
+    🔒 <strong>MEDIPEEL 대외비 시스템 — 임직원 전용</strong><br>
     본 시스템은 MEDIPEEL 품질관리팀 전용 내부 시스템입니다. 모든 접속 기록 및 활동이 보안 서버에 저장됩니다.<br>
     무단 접근, 데이터 무단 복제·유출·공유는 사규 및 관련 법령(개인정보보호법, 영업비밀보호법 등)에 따라 엄중 처벌됩니다.<br>
     <strong>MEDIPEEL Co., Ltd.</strong> &nbsp;·&nbsp; Quality Management Team &nbsp;·&nbsp; QMS v1.0
@@ -1310,6 +1273,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
             <tr>
               <th>아이디</th>
               <th>이름</th>
+              <th>그룹</th>
               <th>권한</th>
               <th style="text-align:right">관리</th>
             </tr>
@@ -1334,6 +1298,21 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
               <input class="af-input" id="af-pw" type="password" placeholder="비밀번호 설정">
             </div>
             <div class="af-group">
+              <label class="af-label" for="af-group">그룹</label>
+              <select class="af-select" id="af-group">
+                <option value="">-- 미지정 --</option>
+                <option value="품질구매팀">품질구매팀</option>
+                <option value="경영지원본부">경영지원본부</option>
+                <option value="상품본부">상품본부</option>
+                <option value="상품기획팀">상품기획팀</option>
+                <option value="디자인팀">디자인팀</option>
+                <option value="스킨이데아">스킨이데아</option>
+                <option value="윈게이트코리아">윈게이트코리아</option>
+                <option value="해외영업팀">해외영업팀</option>
+                <option value="MSPI">MSPI</option>
+              </select>
+            </div>
+            <div class="af-group">
               <label class="af-label" for="af-role">권한</label>
               <select class="af-select" id="af-role">
                 <option value="user">일반 사용자</option>
@@ -1355,30 +1334,99 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 <!-- ✦ 최하단 보안 배너 (로그인 화면용) ✦ -->
 <div class="sec-bar sec-bar-bottom" id="login-sec-bottom">
-  🔒 &nbsp;<strong>MEDIPEEL 기밀 시스템</strong> — 임직원 전용 · 모든 접속 기록 보관 · 무단 접근 시 법적 조치
+  🔒 &nbsp;<strong>MEDIPEEL 대외비 시스템</strong> — 임직원 전용 · 모든 접속 기록 보관 · 무단 접근 시 법적 조치
 </div>
 
 <script>
 // ── 계정 관리 ──
 // DEFAULT_ACCOUNTS : 코드 고정 기본값 (localStorage가 비어있을 때 초기값으로 사용)
 // 변경 사항은 localStorage에 저장되어 같은 브라우저 내에서는 유지됨
+// 등록된 그룹 목록 (향후 확장 가능)
+const GROUPS = ['품질구매팀', '경영지원본부', '상품본부', '상품기획팀', '디자인팀', '스킨이데아', '윈게이트코리아', '해외영업팀', '영업지원팀', 'MSPI'];
+
+// 상품본부/상품기획팀/디자인팀/스킨이데아 접근 허용 세션 목록
+const RA_ALLOWED = ['QMS_01','QMS_02','QMS_04','QMS_06','QMS_07','QMS_08','QMS_10','QMS_11'];
+
 const DEFAULT_ACCOUNTS = [
-  { id:'admin',   pw:'admin1234', name:'관리자', initials:'관', role:'admin' },
-  { id:'yjpark',  pw:'1111',      name:'박영주', initials:'박', role:'user'  },
+  // allowedModules: null  → 전체 세션 접근 허용
+  // allowedModules: RA_ALLOWED  → 지정 세션만 접근 허용
+  // group: GROUPS 중 하나 또는 ''
+  { id:'admin',         pw:'admin1234',    name:'관리자',        initials:'관', role:'admin', group:'',           allowedModules: null      },
+  { id:'si.yun',        pw:'si.yun01',     name:'윤상일 상무',   initials:'윤', role:'user',  group:'MSPI',        allowedModules: null      },
+  { id:'yjpark',        pw:'yjpark',       name:'박영주 팀장',   initials:'박', role:'user',  group:'품질구매팀',  allowedModules: null      },
+  { id:'yeonjeong.heo', pw:'yeonjeong.heo',name:'허연정 파트장', initials:'허', role:'user',  group:'품질구매팀',  allowedModules: null      },
+  { id:'seoyoung.lee',  pw:'seoyoung.lee', name:'이서영 사원',   initials:'이', role:'user',  group:'품질구매팀',  allowedModules: null      },
+  // 상품본부
+  { id:'bbibbiks123',   pw:'bbibbiks123',  name:'임경선 수석',   initials:'임', role:'user',  group:'상품본부',    allowedModules: RA_ALLOWED },
+  // 상품기획팀
+  { id:'dajeong.lee',   pw:'dajeong.lee',  name:'이다정 사원',   initials:'이', role:'user',  group:'상품기획팀',  allowedModules: RA_ALLOWED },
+  { id:'inhee.park',    pw:'inhee.park01', name:'박인희 책임',   initials:'박', role:'user',  group:'상품기획팀',  allowedModules: RA_ALLOWED },
+  { id:'kyungah.kang',  pw:'kyungah.kang02',name:'강경아 책임',  initials:'강', role:'user',  group:'상품기획팀',  allowedModules: RA_ALLOWED },
+  { id:'heejung.cha',   pw:'heejung.cha',  name:'차희정 책임',  initials:'차', role:'user',  group:'상품기획팀',  allowedModules: RA_ALLOWED },
+  { id:'heesoo.han',    pw:'heesoo.han777',name:'한희수 선임',  initials:'한', role:'user',  group:'상품기획팀',  allowedModules: RA_ALLOWED },
+  { id:'yuyoung.kim',   pw:'yuyoung.kim123',name:'김유영 선임', initials:'김', role:'user',  group:'상품기획팀',  allowedModules: RA_ALLOWED },
+  { id:'seohee.kim',    pw:'seohee.kim',   name:'김서희 인턴',   initials:'김', role:'user',  group:'상품기획팀',  allowedModules: RA_ALLOWED },
+  // 디자인팀
+  { id:'hkang20601',    pw:'hkang20601',   name:'강현 팀장',     initials:'강', role:'user',  group:'디자인팀',    allowedModules: RA_ALLOWED },
+  { id:'minkim0492',    pw:'minkim0492',   name:'김동민 주임',   initials:'김', role:'user',  group:'디자인팀',    allowedModules: RA_ALLOWED },
+  { id:'hongkyun.kim',  pw:'hongkyun.kim', name:'김홍균 사원',   initials:'김', role:'user',  group:'디자인팀',    allowedModules: RA_ALLOWED },
+  { id:'kezli',         pw:'kezli',        name:'김도연 사원',   initials:'김', role:'user',  group:'디자인팀',    allowedModules: RA_ALLOWED },
+  { id:'gahyun.lim',    pw:'gahyun.lim',  name:'임가현 사원',   initials:'임', role:'user',  group:'디자인팀',    allowedModules: RA_ALLOWED },
+  { id:'haeun.you',     pw:'haeun07',     name:'유하은',        initials:'유', role:'user',  group:'디자인팀',    allowedModules: RA_ALLOWED },
+  // 스킨이데아
+  { id:'hyunjong.wi',   pw:'hyunjong.wi01',name:'위현종 대표이사', initials:'위', role:'user', group:'스킨이데아',    allowedModules: null      },
+  // 품질구매팀 추가
+  { id:'seongyun',      pw:'seongyun',     name:'강성윤 책임',    initials:'강', role:'user', group:'품질구매팀',   allowedModules: null      },
+  { id:'kwangseob.kim', pw:'kwangseob.kim',name:'김광섭 책임',    initials:'김', role:'user', group:'품질구매팀',   allowedModules: null      },
+  { id:'hhs',           pw:'hhs',          name:'황현섭 선임',    initials:'황', role:'user', group:'품질구매팀',   allowedModules: null      },
+  { id:'joomi.lee',     pw:'joomi.lee',    name:'이주미 선임',    initials:'이', role:'user', group:'품질구매팀',   allowedModules: null      },
+  { id:'yena',          pw:'yena',         name:'유예나 주임',    initials:'유', role:'user', group:'품질구매팀',   allowedModules: null      },
+  // 윈게이트코리아 (QMS_07·QMS_08만 접근 허용 → data-module 기준: QMS_06·QMS_08)
+  // 해외영업팀 (QMS_01·QMS_02·QMS_06만 접근 허용)
+  { id:'sales01',       pw:'sales01',      name:'해외영업01',     initials:'영', role:'user', group:'해외영업팀',    allowedModules: ['QMS_01','QMS_02','QMS_06','QMS_11'] },
+  { id:'sales02',       pw:'sales02',      name:'해외영업02',     initials:'영', role:'user', group:'해외영업팀',    allowedModules: ['QMS_01','QMS_02','QMS_06','QMS_11'] },
+  { id:'sales03',       pw:'sales03',      name:'해외영업03',     initials:'영', role:'user', group:'해외영업팀',    allowedModules: ['QMS_01','QMS_02','QMS_06','QMS_11'] },
+  { id:'sales04',       pw:'sales04',      name:'해외영업04',     initials:'영', role:'user', group:'해외영업팀',    allowedModules: ['QMS_01','QMS_02','QMS_06','QMS_11'] },
+  { id:'sales05',       pw:'sales05',      name:'해외영업05',     initials:'영', role:'user', group:'해외영업팀',    allowedModules: ['QMS_01','QMS_02','QMS_06','QMS_11'] },
+  // 윈게이트코리아
+  { id:'jack',          pw:'jack',         name:'표신형 파트장',  initials:'표', role:'user', group:'윈게이트코리아', allowedModules: ['QMS_01','QMS_06','QMS_08','QMS_11'] },
+  { id:'min2',          pw:'min2',         name:'권민성',         initials:'권', role:'user', group:'윈게이트코리아', allowedModules: ['QMS_01','QMS_06','QMS_08','QMS_11'] },
+  { id:'mateo',         pw:'mateo',        name:'송지섭',         initials:'송', role:'user', group:'윈게이트코리아', allowedModules: ['QMS_01','QMS_06','QMS_08','QMS_11'] },
+  // 영업지원팀 공용 계정 (RA_PMS 신규 등록 관리 · RA_인허가 완료 현황 세션 접근 허용 → data-module 기준: QMS_01·QMS_02)
+  { id:'salessupport',  pw:'salessupport', name:'영업지원팀 공용계정', initials:'영', role:'user', group:'영업지원팀', allowedModules: ['QMS_01','QMS_02'] },
 ];
 const STORE_KEY = 'qms_accounts';
 
 function loadAccounts() {
+  let stored = [];
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) {
       const list = JSON.parse(raw);
-      if (Array.isArray(list) && list.length > 0) return list;
+      if (Array.isArray(list) && list.length > 0) stored = list;
     }
   } catch(e) {}
-  // 첫 방문이거나 데이터 손상 시: 기본값으로 초기화
-  saveAccounts(DEFAULT_ACCOUNTS);
-  return DEFAULT_ACCOUNTS;
+  // DEFAULT_ACCOUNTS 기준으로 병합
+  // · 없는 계정 → 추가
+  // · 있는 계정 → allowedModules / group / role 은 코드 기준으로 항상 동기화
+  let changed = false;
+  DEFAULT_ACCOUNTS.forEach(def => {
+    const idx = stored.findIndex(a => a.id === def.id);
+    if (idx === -1) {
+      stored.push(def);
+      changed = true;
+    } else {
+      if (JSON.stringify(stored[idx].allowedModules) !== JSON.stringify(def.allowedModules)) {
+        stored[idx].allowedModules = def.allowedModules;
+        changed = true;
+      }
+      if (stored[idx].group !== def.group) { stored[idx].group = def.group; changed = true; }
+      if (stored[idx].role  !== def.role)  { stored[idx].role  = def.role;  changed = true; }
+    }
+  });
+  if (stored.length === 0) { stored = [...DEFAULT_ACCOUNTS]; changed = true; }
+  if (changed) saveAccounts(stored);
+  return stored;
 }
 
 function saveAccounts(list) {
@@ -1408,8 +1456,10 @@ function doLogin() {
   if (acct) {
     err.classList.remove('show');
     currentUser = acct;
-    sessionStorage.setItem('qms_user', acct.id);
-    sessionStorage.setItem('qms_user_name', acct.name);
+    localStorage.setItem('qms_user', acct.id);
+    localStorage.setItem('qms_user_name', acct.name);
+    localStorage.setItem('qms_login_time', Date.now());
+    localStorage.setItem('qms_last_id', acct.id);
     document.getElementById('user-name-display').textContent = acct.name;
     document.getElementById('user-avatar').textContent       = acct.initials || getInitials(acct.name);
     document.getElementById('login-screen').style.display    = 'none';
@@ -1422,6 +1472,8 @@ function doLogin() {
     applyWatermark(acct.id);
     startClock();
     setHeroDate();
+    if (sessionCheckTimer) clearInterval(sessionCheckTimer);
+    sessionCheckTimer = setInterval(checkSessionTimeout, 60 * 1000);
   } else {
     err.classList.add('show');
     document.getElementById('inp-pw').value = '';
@@ -1432,8 +1484,9 @@ function doLogin() {
 // ── 로그아웃 ──
 function doLogout() {
   currentUser = null;
-  sessionStorage.removeItem('qms_user');
-  sessionStorage.removeItem('qms_user_name');
+  localStorage.removeItem('qms_user');
+  localStorage.removeItem('qms_user_name');
+  localStorage.removeItem('qms_login_time');
   document.getElementById('main-app').style.display         = 'none';
   document.getElementById('login-screen').style.display     = 'flex';
   document.getElementById('login-sec-bottom').style.display = 'block';
@@ -1442,6 +1495,7 @@ function doLogout() {
   document.getElementById('login-error').classList.remove('show');
   document.getElementById('btn-admin').classList.remove('visible');
   if (clockTimer) clearInterval(clockTimer);
+  if (sessionCheckTimer) clearInterval(sessionCheckTimer);
 }
 
 // ── 시계 / 날짜 ──
@@ -1492,6 +1546,7 @@ function renderUserTable() {
       ? '' // 자기 자신 및 admin 계정 삭제 불가
       : `<button class="tbl-btn del" onclick="deleteUser('${acct.id}')">삭제</button>`;
 
+    const groupText = acct.group || '-';
     tbody.innerHTML += `
       <tr>
         <td>
@@ -1502,6 +1557,7 @@ function renderUserTable() {
           </div>
         </td>
         <td class="u-name">${acct.name}</td>
+        <td style="font-size:11px;color:var(--text3)">${groupText}</td>
         <td>${roleBadge}</td>
         <td style="text-align:right">
           <button class="tbl-btn" onclick="togglePwRow('${acct.id}')">비밀번호 변경</button>
@@ -1509,7 +1565,7 @@ function renderUserTable() {
         </td>
       </tr>
       <tr id="pw-row-${acct.id}">
-        <td colspan="4" style="padding:0 12px 10px">
+        <td colspan="5" style="padding:0 12px 10px">
           <div class="pw-change-row" id="pw-change-${acct.id}">
             <input class="af-input" id="pw-new-${acct.id}" type="password" placeholder="새 비밀번호" style="flex:1">
             <button class="btn-pw-save" onclick="savePw('${acct.id}')">저장</button>
@@ -1561,17 +1617,18 @@ function addUser() {
   const id   = document.getElementById('af-id').value.trim();
   const name = document.getElementById('af-name').value.trim();
   const pw   = document.getElementById('af-pw').value;
-  const role = document.getElementById('af-role').value;
-  const msg  = document.getElementById('af-msg');
+  const role  = document.getElementById('af-role').value;
+  const group = document.getElementById('af-group').value;
+  const msg   = document.getElementById('af-msg');
 
   if (!id || !name || !pw) {
     msg.className = 'af-msg err';
     msg.textContent = '아이디, 이름, 비밀번호를 모두 입력하세요.';
     return;
   }
-  if (!/^[a-zA-Z0-9_]+$/.test(id)) {
+  if (!/^[a-zA-Z0-9_.]+$/.test(id)) {
     msg.className = 'af-msg err';
-    msg.textContent = '아이디는 영문·숫자·_만 사용 가능합니다.';
+    msg.textContent = '아이디는 영문·숫자·_·.만 사용 가능합니다.';
     return;
   }
   if (pw.length < 4) {
@@ -1585,7 +1642,7 @@ function addUser() {
     msg.textContent = '이미 존재하는 아이디입니다.';
     return;
   }
-  accounts.push({ id, pw, name, initials: getInitials(name), role });
+  accounts.push({ id, pw, name, initials: getInitials(name), role, group, allowedModules: null });
   saveAccounts(accounts);
   msg.className = 'af-msg ok';
   msg.textContent = `'${id}' 계정이 추가되었습니다.`;
@@ -1596,7 +1653,8 @@ function addUser() {
 
 function clearAddForm(clearMsg = true) {
   ['af-id','af-name','af-pw'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('af-role').value = 'user';
+  document.getElementById('af-role').value  = 'user';
+  document.getElementById('af-group').value = '';
   if (clearMsg) document.getElementById('af-msg').textContent = '';
 }
 
@@ -1609,6 +1667,44 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ── 모듈 최근 업데이트 일시 조회 ──
+// ── 세션 접근 제어 ──
+// allowedModules: null  → 전체 허용
+// allowedModules: ['QMS_01','QMS_04'] → 지정 세션만 허용
+function canAccessModule(moduleId) {
+  if (!currentUser) return false;
+  if (currentUser.role === 'admin') return true;
+  if (currentUser.allowedModules === null || currentUser.allowedModules === undefined) return true;
+  return Array.isArray(currentUser.allowedModules) && currentUser.allowedModules.includes(moduleId);
+}
+
+function showAccessDenied(moduleName) {
+  const existing = document.getElementById('access-denied-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.id = 'access-denied-toast';
+  toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a2035;color:#fff;border-radius:14px;padding:28px 36px;z-index:9999;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.4);min-width:260px';
+  toast.innerHTML = `<div style="font-size:28px;margin-bottom:10px">🔒</div>
+    <div style="font-size:15px;font-weight:700;margin-bottom:6px">접근 제한</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.6)">${moduleName} 세션에 대한<br>접근 권한이 없습니다.</div>
+    <button onclick="this.parentElement.remove()" style="margin-top:16px;padding:7px 22px;border:none;border-radius:7px;background:#2e5fe8;color:#fff;font-size:12px;font-weight:600;cursor:pointer">확인</button>`;
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast.parentElement) toast.remove(); }, 3000);
+}
+
+// 메뉴 카드 클릭 이벤트 (접근 제어 적용)
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.menu-card[data-module]').forEach(card => {
+    card.addEventListener('click', function(e) {
+      const moduleId = this.getAttribute('data-module');
+      if (!canAccessModule(moduleId)) {
+        e.preventDefault();
+        const title = this.querySelector('.menu-card-title')?.textContent || moduleId;
+        showAccessDenied(title);
+      }
+    });
+  });
+});
+
 async function loadModuleLastUpdated() {
   const items = document.querySelectorAll('.sys-item[data-webapp]');
   const fetches = [...items].map(async item => {
@@ -1633,18 +1729,111 @@ async function loadModuleLastUpdated() {
   await Promise.all(fetches);
 }
 
+const SESSION_TIMEOUT_MS = 150 * 60 * 1000; // 2시간 30분
+let sessionCheckTimer = null;
+
+function checkSessionTimeout() {
+  const loginTime = parseInt(localStorage.getItem('qms_login_time') || '0', 10);
+  if (!loginTime) return;
+  if (Date.now() - loginTime >= SESSION_TIMEOUT_MS) {
+    if (sessionCheckTimer) clearInterval(sessionCheckTimer);
+    doLogout();
+    // 만료 안내 토스트
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a2035;color:#fff;border-radius:14px;padding:28px 36px;z-index:9999;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.4);min-width:260px';
+    toast.innerHTML = '<div style="font-size:28px;margin-bottom:10px">⏱️</div><div style="font-size:15px;font-weight:700;margin-bottom:6px">세션 만료</div><div style="font-size:12px;color:rgba(255,255,255,.6)">보안을 위해 1시간 후<br>자동 로그아웃되었습니다.</div><button onclick="this.parentElement.remove()" style="margin-top:16px;padding:7px 22px;border:none;border-radius:7px;background:#2e5fe8;color:#fff;font-size:12px;font-weight:600;cursor:pointer">확인</button>';
+    document.body.appendChild(toast);
+  }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+  // 세션 자동 복원: 로그인 후 뒤로가기 시 로그인 화면 재표시 방지
+  const savedUser = localStorage.getItem('qms_user');
+  if (savedUser) {
+    // 1시간 만료 체크
+    const loginTime = parseInt(localStorage.getItem('qms_login_time') || '0', 10);
+    if (loginTime && Date.now() - loginTime >= SESSION_TIMEOUT_MS) {
+      localStorage.removeItem('qms_user');
+      localStorage.removeItem('qms_user_name');
+      localStorage.removeItem('qms_login_time');
+    } else {
+      const acct = loadAccounts().find(a => a.id === savedUser)
+                 || DEFAULT_ACCOUNTS.find(a => a.id === savedUser);
+      if (acct) {
+        currentUser = acct;
+        document.getElementById('user-name-display').textContent = acct.name;
+        document.getElementById('user-avatar').textContent       = acct.initials || getInitials(acct.name);
+        const btnAdmin = document.getElementById('btn-admin');
+        if (acct.role === 'admin') btnAdmin.classList.add('visible');
+        else                       btnAdmin.classList.remove('visible');
+        document.getElementById('login-screen').style.display    = 'none';
+        document.getElementById('login-sec-bottom').style.display= 'none';
+        document.getElementById('main-app').style.display        = 'flex';
+        startClock();
+        setHeroDate();
+        applyWatermark(acct.id);
+        // 1분마다 세션 만료 체크
+        sessionCheckTimer = setInterval(checkSessionTimeout, 60 * 1000);
+      }
+    }
+  }
   loadModuleLastUpdated();
+
+  // 마지막 로그인 아이디 자동 채우기
+  const lastId = localStorage.getItem('qms_last_id');
+  if (lastId) {
+    const inpId = document.getElementById('inp-id');
+    if (inpId) inpId.value = lastId;
+  }
 });
 
-// ── 메모장 ──
+// ── 메모장 (Google Sheets 실시간 동기화) ──
 (function() {
-  const MEMO_KEY = 'qms_dashboard_memo';
-  const ta       = document.getElementById('qms-memo');
-  const saved    = document.getElementById('memo-saved');
+  const GAS_MEMO_URL = 'https://script.google.com/macros/s/AKfycbxN2bX9X2_iEjYAN3WWrZtW9NvF9--R2KLSMIPN3Rw4j7cXOBTGcGxnZrrdJ9fXbgD1/exec';
+  const MEMO_LS_KEY  = 'qms_dashboard_memo';
+  const ta    = document.getElementById('qms-memo');
+  const saved = document.getElementById('memo-saved');
   if (!ta) return;
 
-  ta.value = localStorage.getItem(MEMO_KEY) || '';
+  // 초기 로드: localStorage 먼저 보여주고 GAS로 덮어쓰기
+  ta.value = localStorage.getItem(MEMO_LS_KEY) || '';
+
+  // 메모 불러오기
+  // isInitial=true: 첫 로드 시 GAS 성공하면 적용, 실패하면 localStorage 유지
+  // isInitial=false (폴링): GAS 성공 + 내용 다를 때만 반영, 실패 시 현재 내용 유지
+  async function loadMemo(isInitial) {
+    if (document.activeElement === ta) return; // 입력 중엔 덮어쓰지 않음
+    try {
+      const res  = await fetch(`${GAS_MEMO_URL}?action=getMemo&t=${Date.now()}`);
+      const json = await res.json();
+      // GAS에서 유효한 응답이 왔을 때만 반영 (error 응답 무시)
+      if (typeof json.memo === 'string') {
+        if (ta.value !== json.memo) ta.value = json.memo;
+        localStorage.setItem(MEMO_LS_KEY, json.memo); // 로컬에도 동기화
+      }
+      // error 응답(unknown action 등)이면 현재 내용 그대로 유지
+    } catch(e) {
+      // 네트워크 오류 시 현재 내용 유지 (초기 로드면 localStorage 이미 적용됨)
+    }
+  }
+
+  // 메모 저장
+  async function saveMemo(text) {
+    localStorage.setItem(MEMO_LS_KEY, text); // 항상 로컬 먼저 저장
+    try {
+      const res  = await fetch(`${GAS_MEMO_URL}?action=saveMemo&memo=${encodeURIComponent(text)}&t=${Date.now()}`);
+      const json = await res.json();
+      saved.textContent = json.ok ? '저장됨 ✓' : '로컬 저장됨';
+    } catch(e) {
+      saved.textContent = '로컬 저장됨';
+    }
+    saved.classList.add('show');
+    setTimeout(() => saved.classList.remove('show'), 1800);
+  }
+
+  loadMemo(true);
+  // 30초마다 다른 브라우저 변경사항 반영
+  setInterval(() => loadMemo(false), 30000);
 
   ta.addEventListener('dblclick', e => {
     e.stopPropagation();
@@ -1661,11 +1850,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let saveTimer;
   ta.addEventListener('input', () => {
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-      localStorage.setItem(MEMO_KEY, ta.value);
-      saved.classList.add('show');
-      setTimeout(() => saved.classList.remove('show'), 1500);
-    }, 800);
+    saveTimer = setTimeout(() => saveMemo(ta.value), 800);
   });
 })();
 </script>
