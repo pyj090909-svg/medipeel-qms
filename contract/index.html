@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QMS 계약 관리 | MEDIPEEL</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system,'Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',Arial,sans-serif; font-size:13px; background:#f0f3f9; color:#1a2035; line-height:1.5; }
+
+.sec-bar { width:100%; background:#0a1230; color:rgba(255,255,255,.70); font-size:11px; font-weight:500; display:flex; align-items:center; gap:14px; padding:6px 20px; }
+.sec-bar strong { color:#8ab4ff; }
+.sec-bar .sep { width:1px; height:11px; background:rgba(255,255,255,.15); }
+.sec-right { margin-left:auto; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.sec-collect { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:rgba(255,255,255,.70); }
+.sec-collect-dot { width:6px; height:6px; border-radius:50%; background:#f87171; flex-shrink:0; animation:sec-blink 1.2s ease-in-out infinite; }
+@keyframes sec-blink { 0%,100%{opacity:1} 50%{opacity:.12} }
+
+.header { background:linear-gradient(135deg,#0f1c45 0%,#1e3a82 60%,#1a306e 100%); color:white; padding:16px 28px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(15,28,69,.30); }
+.header-left { display:flex; align-items:center; gap:12px; }
+.back-btn { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:rgba(255,255,255,.60); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:6px; padding:4px 10px; text-decoration:none; transition:background .15s; }
+.back-btn:hover { background:rgba(255,255,255,.14); color:#fff; }
+.header-tag { font-size:10px; font-weight:700; color:rgba(255,255,255,.45); letter-spacing:.10em; text-transform:uppercase; margin-bottom:3px; }
+.header-title { font-size:17px; font-weight:700; letter-spacing:-.3px; }
+.header-right { text-align:right; }
+.header-sub { font-size:11px; color:rgba(255,255,255,.45); }
+.header-time { font-size:12px; color:rgba(255,255,255,.80); font-variant-numeric:tabular-nums; }
+.sync-status { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:rgba(255,255,255,.55); margin-top:3px; }
+.sync-dot { width:6px; height:6px; border-radius:50%; background:#0ea97e; animation:pulse 2s infinite; }
+.sync-dot.err { background:#e03c3c; animation:none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.header-logo { height:30px; width:auto; object-fit:contain; filter:brightness(0) invert(1); opacity:.92; }
+
+.main { padding:18px 24px 40px; max-width:1700px; margin:0 auto; }
+
+/* KPI */
+.kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+.kpi-card { background:#fff; border:1px solid #e4e8f2; border-radius:10px; padding:8px 14px; position:relative; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); cursor:pointer; transition:box-shadow .15s, border-color .15s, transform .10s; user-select:none; display:flex; align-items:center; gap:14px; }
+.kpi-card:hover { box-shadow:0 4px 14px rgba(46,95,232,.14); border-color:#b0c4f8; transform:translateY(-1px); }
+.kpi-card.active { border-color:#2e5fe8; box-shadow:0 0 0 2px rgba(46,95,232,.25), 0 4px 14px rgba(46,95,232,.12); }
+.kpi-card.active .kpi-label { color:#2e5fe8; }
+.kpi-card::before { content:''; position:absolute; top:0; left:0; bottom:0; width:3px; border-radius:10px 0 0 10px; }
+.kpi-card.c1::before { background:linear-gradient(180deg,#2e5fe8,#7c5ce8); }
+.kpi-card.c2::before { background:linear-gradient(180deg,#0ea97e,#0bc4a8); }
+.kpi-card.c3::before { background:linear-gradient(180deg,#d98b10,#f0b030); }
+.kpi-label { font-size:10px; font-weight:600; color:#8a93b0; letter-spacing:.05em; text-transform:uppercase; flex:1; }
+.kpi-value { font-size:20px; font-weight:700; color:#1a2035; letter-spacing:-.02em; line-height:1; }
+.kpi-value .unit { font-size:11px; font-weight:400; color:#8a93b0; margin-left:2px; }
+
+/* TOOLBAR */
+.toolbar { display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.toolbar-left { display:flex; align-items:center; gap:8px; flex:1; flex-wrap:wrap; }
+.search-box { display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #d0d5e8; border-radius:8px; padding:6px 12px; min-width:240px; }
+.search-box input { border:none; outline:none; font-size:12px; font-family:inherit; background:transparent; flex:1; color:#1a2035; }
+.search-box input::placeholder { color:#b0b8cc; }
+.btn-refresh { padding:7px 12px; background:#fff; border:1px solid #d0d5e8; border-radius:8px; font-size:12px; font-family:inherit; color:#4a5470; cursor:pointer; }
+.btn-refresh:hover { background:#eef0f5; }
+.btn-add { padding:8px 16px; background:linear-gradient(135deg,#2e5fe8,#1a4acc); border:none; border-radius:8px; font-size:12px; font-weight:700; font-family:inherit; color:#fff; cursor:pointer; box-shadow:0 2px 8px rgba(46,95,232,.30); white-space:nowrap; }
+.btn-add:hover { opacity:.88; }
+.btn-copy-excel { display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border:1px solid #4caf50; border-radius:8px; background:#fff; color:#2e7d32; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; transition:all .18s; white-space:nowrap; }
+.btn-copy-excel:hover { background:#e8f5e9; }
+.btn-copy-excel.copied { background:#4caf50; color:#fff; pointer-events:none; }
+
+/* TABLE */
+.table-wrap { background:#fff; border:1px solid #e4e8f2; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.table-inner { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:12px; min-width:1100px; table-layout:fixed; }
+thead th { background:#0f1c45; color:rgba(255,255,255,.90); padding:10px 12px; font-size:11px; font-weight:600; text-align:center; white-space:nowrap; letter-spacing:.03em; position:sticky; top:0; }
+thead th.th-sort { cursor:pointer; user-select:none; }
+thead th.th-sort:hover { background:#1a2f60; }
+.sort-ico { display:inline-block; width:12px; font-size:9px; margin-left:3px; opacity:.4; vertical-align:middle; }
+.sort-ico::after { content:'⇅'; }
+thead th.sort-asc  .sort-ico { opacity:1; }
+thead th.sort-asc  .sort-ico::after { content:'▲'; }
+thead th.sort-desc .sort-ico { opacity:1; }
+thead th.sort-desc .sort-ico::after { content:'▼'; }
+
+tbody tr { border-bottom:1px solid #f0f2f8; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:#f4f7ff; }
+tbody td { padding:10px 12px; vertical-align:middle; color:#2a3355; }
+.td-center { text-align:center; }
+.td-vendor { font-weight:700; color:#1a2035; text-align:center; }
+.td-content { font-size:12px; color:#374151; text-align:center; white-space:normal; word-break:break-word; }
+.no-data { text-align:center; padding:48px 20px; color:#8a93b0; font-size:13px; }
+
+/* 상태 배지 */
+.badge { display:inline-block; border-radius:4px; padding:3px 9px; font-size:10px; font-weight:700; white-space:nowrap; line-height:1.6; }
+.bs-진행중     { background:transparent; color:#1a2035; padding:3px 0; }
+.bs-만료임박   { background:#fff7ed; color:#c2410c; }
+.bs-만료       { background:#fee2e2; color:#b91c1c; }
+
+/* D-day */
+.dday { font-size:11px; font-weight:600; color:#4a5470; }
+.dday.warn { color:#c2410c; }
+.dday.danger { color:#b91c1c; }
+
+/* 링크 칩 */
+.link-cell { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; }
+.link-chip { display:inline-flex; align-items:center; gap:3px; padding:3px 7px; border-radius:12px; background:#eef2ff; color:#3730a3; font-size:10px; font-weight:600; text-decoration:none; border:1px solid #c7d2fe; transition:all .15s; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; font-family:inherit; }
+.link-chip:hover { background:#3730a3; color:#fff; border-color:#3730a3; }
+.link-chip.empty { background:#f3f4f6; color:#9ca3af; border-color:#e5e7eb; cursor:default; pointer-events:none; }
+
+/* 관리 버튼 */
+.btn-row { padding:4px 12px; border-radius:5px; border:1px solid #d0d5e8; background:#f4f6fb; font-size:11px; font-family:inherit; color:#4a5470; cursor:pointer; transition:background .12s; white-space:nowrap; margin:0 2px; }
+.btn-row:hover { background:#2e5fe8; color:#fff; border-color:#2e5fe8; }
+.btn-row.del { color:#b91c1c; border-color:#fecaca; }
+.btn-row.del:hover { background:#dc2626; color:#fff; border-color:#dc2626; }
+
+.table-footer { display:flex; align-items:center; justify-content:space-between; padding:9px 14px; border-top:1px solid #f0f2f8; font-size:11px; color:#8a93b0; }
+
+/* 모달 */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(4px); z-index:500; display:none; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff; border-radius:16px; width:680px; max-width:96vw; max-height:92vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.22); overflow:hidden; }
+.modal-head { padding:18px 22px 14px; border-bottom:1px solid #eef0f5; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.modal-head-icon { width:36px; height:36px; border-radius:10px; background:rgba(46,95,232,.10); display:flex; align-items:center; justify-content:center; font-size:16px; }
+.modal-head-title { font-size:15px; font-weight:700; }
+.modal-head-sub { font-size:11px; color:#8a93b0; margin-top:1px; }
+.modal-close { margin-left:auto; width:28px; height:28px; border-radius:7px; background:#f0f2f8; border:none; cursor:pointer; font-size:14px; color:#4a5470; display:flex; align-items:center; justify-content:center; }
+.modal-close:hover { background:#e4e8f2; }
+.modal-body { flex:1; overflow-y:auto; padding:18px 22px; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.form-group.full { grid-column:1 / -1; }
+.form-section-label { grid-column:1 / -1; font-size:11px; font-weight:700; color:#2e5fe8; letter-spacing:.06em; text-transform:uppercase; padding-bottom:4px; border-bottom:2px solid #dbeafe; margin-top:4px; }
+.form-label { font-size:11px; font-weight:600; color:#8a93b0; letter-spacing:.05em; text-transform:uppercase; }
+.form-input,.form-textarea { padding:8px 12px; border:1px solid #d0d5e8; border-radius:8px; font-size:13px; font-family:inherit; color:#1a2035; outline:none; transition:border-color .18s; }
+.form-input:focus,.form-textarea:focus { border-color:#2e5fe8; }
+.form-textarea { resize:vertical; min-height:74px; font-family:'Menlo','Monaco',monospace; font-size:12px; }
+.form-hint { font-size:10px; color:#8a93b0; margin-top:3px; }
+.modal-foot { padding:12px 22px; border-top:1px solid #eef0f5; display:flex; justify-content:flex-end; gap:8px; flex-shrink:0; }
+.btn-cancel { padding:8px 16px; background:#f0f2f8; border:none; border-radius:8px; font-size:13px; font-family:inherit; color:#4a5470; cursor:pointer; }
+.btn-save { padding:8px 20px; background:linear-gradient(135deg,#2e5fe8,#1a4acc); border:none; border-radius:8px; font-size:13px; font-weight:700; font-family:inherit; color:#fff; cursor:pointer; }
+.btn-save:hover { opacity:.88; }
+.form-msg { font-size:11px; margin-right:auto; padding:4px 0; }
+.form-msg.ok { color:#0ea97e; }
+.form-msg.err { color:#e03c3c; }
+
+/* 토스트 & 확인 다이얼로그 */
+.toast-msg { position:fixed; bottom:30px; right:30px; background:#1a2035; color:#fff; padding:11px 18px; border-radius:9px; font-size:12px; font-weight:500; opacity:0; transform:translateY(10px); transition:all .25s; pointer-events:none; z-index:9999; }
+.toast-msg.show { opacity:1; transform:translateY(0); }
+.confirm-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(4px); z-index:800; display:none; align-items:center; justify-content:center; }
+.confirm-overlay.open { display:flex; }
+.confirm-box { background:#fff; border-radius:14px; width:420px; max-width:92vw; padding:22px 24px; box-shadow:0 20px 60px rgba(0,0,0,.22); }
+.confirm-title { font-size:15px; font-weight:700; color:#1a2035; margin-bottom:8px; }
+.confirm-text { font-size:12px; color:#4a5470; line-height:1.6; margin-bottom:18px; }
+.confirm-btns { display:flex; justify-content:flex-end; gap:8px; }
+
+.sec-footer { background:#0a1230; color:rgba(255,255,255,.35); font-size:11px; text-align:center; padding:12px 20px; line-height:1.7; margin-top:20px; }
+.sec-footer strong { color:rgba(255,255,255,.60); }
+
+.loading-row td { text-align:center; padding:48px 20px; color:#8a93b0; }
+.spinner { display:inline-block; width:18px; height:18px; border:2px solid #d0d5e8; border-top-color:#2e5fe8; border-radius:50%; animation:spin .7s linear infinite; margin-right:8px; vertical-align:middle; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.setup-banner { background:#fff7ed; border:1px solid #fdba74; border-radius:10px; padding:12px 16px; margin-bottom:14px; font-size:12px; color:#9a3412; line-height:1.7; }
+.setup-banner code { background:#fff; padding:1px 6px; border-radius:4px; color:#c2410c; font-family:'Menlo','Monaco',monospace; font-size:11px; }
+</style>
+</head>
+<body>
+
+<div class="sec-bar">
+  🔒 <strong>MEDIPEEL 대외비 시스템</strong> — 임직원 전용 · 모든 접속 및 활동이 기록됩니다.
+  <span class="sep"></span>
+  무단 접근·정보 유출 시 사규 및 관련 법령에 따라 엄중 처벌됩니다.
+  <div class="sec-right">
+    <span class="sep"></span>
+    <span class="sec-collect">
+      <span class="sec-collect-dot"></span>
+      보안 정보 수집 중
+    </span>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <img src="../images/logo.png" alt="MEDIPEEL" class="header-logo" onerror="this.style.display='none'">
+    <a class="back-btn" href="../index.html" onclick="if(window.self!==window.top){event.preventDefault();history.back();}">← 대시보드</a>
+    <div>
+      <div class="header-tag">QMS · 품질 경영 대시보드</div>
+      <div class="header-title">계약 관리 현황</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">연결 중...</span>
+    </div>
+    <div class="header-time" id="clock"></div>
+    <div class="header-sub">DB-QMS-계약관리</div>
+  </div>
+</div>
+
+<div class="main">
+  <div id="setup-banner" class="setup-banner" style="display:none">
+    ⚙️ <strong>최초 설정 필요</strong> — Apps Script 웹앱을 배포한 뒤, <code>index.html</code> 의 <code>WEBAPP_URL_FIXED</code> 값을 발급받은 <code>/exec</code> URL 로 교체해 주세요.<br>
+    배포 절차는 <code>contract/Code.gs</code> 상단 주석 참조.
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card c1" id="kpi-card-all" onclick="setKpiFilter('all')">
+      <div class="kpi-label">전체 계약</div>
+      <div class="kpi-value" id="kpi-total">—<span class="unit">건</span></div>
+    </div>
+    <div class="kpi-card c2" id="kpi-card-active" onclick="setKpiFilter('active')">
+      <div class="kpi-label">계약 유지 중</div>
+      <div class="kpi-value" id="kpi-active">—<span class="unit">건</span></div>
+    </div>
+    <div class="kpi-card c3" id="kpi-card-warn" onclick="setKpiFilter('warn')">
+      <div class="kpi-label">만료 임박 (D-90)</div>
+      <div class="kpi-value" id="kpi-warn">—<span class="unit">건</span></div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-box">
+        🔍
+        <input type="text" id="search-inp" placeholder="검색 (협력업체·계약 내용...)" oninput="applyFilter()">
+      </div>
+      <button class="btn-refresh" onclick="loadData()">↻ 새로고침</button>
+    </div>
+    <button class="btn-copy-excel" id="btn-excel" onclick="copyMainTable(this)">
+      <span>📋</span> 엑셀 복사
+    </button>
+    <button class="btn-add" onclick="openAddModal()">+ 계약 등록</button>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-inner">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:48px">#</th>
+            <th class="th-sort" style="width:17%" onclick="clickSort(this,'협력업체')">협력업체<span class="sort-ico"></span></th>
+            <th class="th-sort" style="width:28%" onclick="clickSort(this,'계약 내용')">계약 내용<span class="sort-ico"></span></th>
+            <th class="th-sort" style="width:11%" onclick="clickSort(this,'계약 일자')">계약 일자<span class="sort-ico"></span></th>
+            <th class="th-sort" style="width:15%" onclick="clickSort(this,'계약 만료 일자')">계약 만료 일자<span class="sort-ico"></span></th>
+            <th style="width:11%">상태</th>
+            <th style="width:10%">계약서 링크</th>
+            <th style="width:78px">관리</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr class="loading-row">
+            <td colspan="8"><span class="spinner"></span>Google Sheets에서 불러오는 중...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span id="table-count">—</span>
+      <span id="last-updated">마지막 업데이트: —</span>
+    </div>
+  </div>
+</div>
+
+<div class="sec-footer">
+  🔒 <strong>MEDIPEEL 대외비 시스템 — 임직원 전용</strong><br>
+  본 시스템의 데이터는 Google Sheets (DB-QMS-계약관리)와 실시간 동기화됩니다.<br>
+  무단 접근·데이터 유출은 사규 및 관련 법령에 따라 엄중 처벌됩니다.<br>
+  <strong>MEDIPEEL Co., Ltd.</strong> · Quality Management Team · QMS v1.0
+</div>
+
+<!-- ── 등록/수정 모달 ── -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-icon">📋</div>
+      <div>
+        <div class="modal-head-title" id="modal-title">계약 등록</div>
+        <div class="modal-head-sub">DB-QMS-계약관리 시트에 저장됩니다</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-section-label">기본 정보</div>
+        <div class="form-group full">
+          <label class="form-label">협력업체 *</label>
+          <input class="form-input" id="f-vendor" placeholder="예: 윈게이트 코리아">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">계약 내용 *</label>
+          <input class="form-input" id="f-content" placeholder="예: RP 대행 계약">
+        </div>
+        <div class="form-group">
+          <label class="form-label">계약 일자 *</label>
+          <input class="form-input" id="f-start" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">계약 만료 일자 *</label>
+          <input class="form-input" id="f-end" type="date">
+        </div>
+
+        <div class="form-section-label">계약서 링크 (통합 관리)</div>
+        <div class="form-group full">
+          <label class="form-label">링크 (한 줄에 하나씩, 최대 3개)</label>
+          <textarea class="form-textarea" id="f-links" placeholder="https://drive.google.com/...&#10;https://drive.google.com/...&#10;https://drive.google.com/..."></textarea>
+          <div class="form-hint">여러 링크를 한 줄씩 입력하면 자동으로 통합 관리됩니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <div class="form-msg" id="modal-msg"></div>
+      <button class="btn-cancel btn-del-modal" id="btn-delete" onclick="deleteFromModal()" style="display:none;background:#fee2e2;color:#b91c1c">🗑 삭제</button>
+      <button class="btn-cancel" onclick="closeModal()">취소</button>
+      <button class="btn-save" id="btn-save" onclick="saveRecord()">저장 → Google Sheets</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 삭제 확인 다이얼로그 ── -->
+<div class="confirm-overlay" id="confirm-modal">
+  <div class="confirm-box">
+    <div class="confirm-title">계약을 삭제하시겠습니까?</div>
+    <div class="confirm-text" id="confirm-text">삭제된 데이터는 복구할 수 없습니다.</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">취소</button>
+      <button class="btn-save" style="background:linear-gradient(135deg,#dc2626,#b91c1c)" id="btn-confirm-del">삭제</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-msg" id="toast-msg"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// ⚠️ 최초 설정: contract/Code.gs 배포 후 발급받은 웹앱 URL 로 교체
+// ─────────────────────────────────────────────
+const WEBAPP_URL_FIXED = 'https://script.google.com/macros/s/AKfycbznINHecrS-YylZl-wUyOfJcLBr4nKBcfYbM7updDMNoAjEdQghsIJTZdSV2_hwJnsq/exec';
+
+const HEADERS = ['협력업체','계약 내용','계약 일자','계약 만료 일자',
+                 '계약서 링크 1','계약서 링크 2','계약서 링크 3'];
+const LINK_COLS = ['계약서 링크 1','계약서 링크 2','계약서 링크 3'];
+
+let allRows   = [];
+let kpiFilter = '';
+let sortCol   = '협력업체';
+let sortDir   = 'desc';
+let editingRowIndex = null;   // 수정 모드일 때 _rowIndex
+let deletingRowIndex = null;
+let pollTimer = null;
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (WEBAPP_URL_FIXED === 'REPLACE_WITH_YOUR_WEBAPP_URL') {
+    document.getElementById('setup-banner').style.display = 'block';
+  }
+  startClock();
+  // 초기 정렬 표시: 협력업체 내림차순
+  const initTh = [...document.querySelectorAll('thead th.th-sort')].find(el => el.getAttribute('onclick')?.includes("'협력업체'"));
+  if (initTh) initTh.classList.add('sort-desc');
+  loadData();
+  // ── 60초마다 자동 갱신으로 여러 브라우저 간 실시간 동기화 ──
+  pollTimer = setInterval(loadData, 60 * 1000);
+
+  // 삭제 확인 핸들러
+  document.getElementById('btn-confirm-del').addEventListener('click', doDelete);
+  // ESC 로 모달 닫기
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeModal(); closeConfirm(); }
+  });
+});
+
+function today() { return new Date().toISOString().slice(0,10); }
+
+function esc(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function gasRequest(params) {
+  if (WEBAPP_URL_FIXED === 'REPLACE_WITH_YOUR_WEBAPP_URL') {
+    throw new Error('WEBAPP_URL_FIXED 를 설정해 주세요. (Code.gs 배포 후 /exec URL 붙여넣기)');
+  }
+  const qs = Object.entries(params)
+    .map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(typeof v==='object' ? JSON.stringify(v) : v)}`)
+    .join('&');
+  const res  = await fetch(`${WEBAPP_URL_FIXED}?${qs}&t=${Date.now()}`, {
+    method: 'GET',
+    redirect: 'follow',
+    cache: 'no-store'
+  });
+  const json = await res.json();
+  if (json.error) throw new Error(json.error);
+  return json;
+}
+
+function startClock() {
+  const tick = () => {
+    const n = new Date();
+    document.getElementById('clock').textContent =
+      [n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+  };
+  tick(); setInterval(tick,1000);
+}
+
+function setSyncStatus(ok, label) {
+  document.getElementById('sync-label').textContent = label;
+  document.getElementById('sync-dot').className = 'sync-dot' + (ok ? '' : ' err');
+}
+
+async function loadData() {
+  setSyncStatus(true,'동기화 중...');
+  if (!allRows.length) {
+    document.getElementById('tbody').innerHTML =
+      '<tr class="loading-row"><td colspan="8"><span class="spinner"></span>Google Sheets에서 불러오는 중...</td></tr>';
+  }
+  try {
+    const json = await gasRequest({ action:'get' });
+    allRows = json.rows || [];
+    applyFilter();
+    updateKPI(allRows);
+    setSyncStatus(true, `연결됨 · ${allRows.length}건`);
+    document.getElementById('last-updated').textContent =
+      `마지막 업데이트: ${new Date().toLocaleTimeString('ko-KR')}`;
+  } catch(e) {
+    setSyncStatus(false,'연결 오류');
+    document.getElementById('tbody').innerHTML =
+      `<tr><td colspan="8" class="no-data">❌ 데이터를 불러올 수 없습니다.<br><small>${esc(e.message)}</small></td></tr>`;
+  }
+}
+
+// 날짜를 yyyy-MM-dd 로 정규화 (2026.01.0.1 같은 오염값 처리)
+function normalizeDate(v) {
+  if (!v) return '';
+  const s = String(v).trim();
+  // yyyy-MM-dd
+  const m1 = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m1) return `${m1[1]}-${m1[2].padStart(2,'0')}-${m1[3].padStart(2,'0')}`;
+  // yyyy.MM.dd  또는  yyyy.MM.0.dd 같은 변형
+  const m2 = s.match(/^(\d{4})\.(\d{1,2})(?:\.\d+)?\.(\d{1,2})$/);
+  if (m2) return `${m2[1]}-${m2[2].padStart(2,'0')}-${m2[3].padStart(2,'0')}`;
+  const m3 = s.match(/^(\d{4})\.(\d{1,2})\.(\d{1,2})$/);
+  if (m3) return `${m3[1]}-${m3[2].padStart(2,'0')}-${m3[3].padStart(2,'0')}`;
+  const d = new Date(s);
+  if (!isNaN(d)) return d.toISOString().slice(0,10);
+  return s;
+}
+
+function daysUntil(dateStr) {
+  const d = normalizeDate(dateStr);
+  if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return null;
+  const target = new Date(d + 'T00:00:00');
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  return Math.floor((target - today) / (1000*60*60*24));
+}
+
+function statusOf(row) {
+  const days = daysUntil(row['계약 만료 일자']);
+  if (days === null) return { key:'unknown', label:'—', dday:'' };
+  if (days < 0)  return { key:'만료',     label:'만료',     dday:`D+${-days}` };
+  if (days <= 90) return { key:'만료임박', label:'만료 임박', dday:`D-${days}` };
+  return { key:'진행중', label:'계약 유지 중', dday: days >= 1095 ? '' : `D-${days}` };
+}
+
+function updateKPI(rows) {
+  let total = rows.length, active = 0, warn = 0;
+  rows.forEach(r => {
+    const s = statusOf(r);
+    if (s.key === '진행중')   active++;
+    if (s.key === '만료임박') warn++;
+  });
+  document.getElementById('kpi-total').innerHTML   = total   + '<span class="unit">건</span>';
+  document.getElementById('kpi-active').innerHTML  = active  + '<span class="unit">건</span>';
+  document.getElementById('kpi-warn').innerHTML    = warn    + '<span class="unit">건</span>';
+}
+
+function setKpiFilter(type) {
+  kpiFilter = (kpiFilter === type) ? '' : type;
+  ['all','active','warn'].forEach(k => {
+    const el = document.getElementById('kpi-card-' + k);
+    if (el) el.classList.toggle('active', kpiFilter === k);
+  });
+  applyFilter();
+}
+
+function clickSort(th, col) {
+  if (sortCol === col) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortCol = col; sortDir = 'asc';
+  }
+  document.querySelectorAll('thead th.th-sort').forEach(el => el.classList.remove('sort-asc','sort-desc'));
+  th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+  applyFilter();
+}
+
+function applyFilter() {
+  const q = document.getElementById('search-inp').value.toLowerCase().trim();
+
+  let filtered = allRows.filter(r => {
+    const vals   = Object.values(r).map(v => String(v).toLowerCase());
+    const matchQ = !q || vals.some(v => v.includes(q));
+    let matchKpi = true;
+    if (kpiFilter && kpiFilter !== 'all') {
+      const s = statusOf(r);
+      if (kpiFilter === 'active')   matchKpi = s.key === '진행중';
+      if (kpiFilter === 'warn')     matchKpi = s.key === '만료임박';
+      if (kpiFilter === 'expired')  matchKpi = s.key === '만료';
+    }
+    return matchQ && matchKpi;
+  });
+
+  if (sortCol && sortDir) {
+    filtered = [...filtered].sort((a,b) => {
+      const av = String(a[sortCol] ?? '');
+      const bv = String(b[sortCol] ?? '');
+      const an = Date.parse(normalizeDate(av)) || parseFloat(av);
+      const bn = Date.parse(normalizeDate(bv)) || parseFloat(bv);
+      const cmp = (!isNaN(an) && !isNaN(bn)) ? an - bn : av.localeCompare(bv, 'ko');
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  } else {
+    // 기본: 만료일 오름차순 (곧 만료되는 것이 위)
+    filtered = [...filtered].sort((a,b) => {
+      const da = daysUntil(a['계약 만료 일자']); const db = daysUntil(b['계약 만료 일자']);
+      if (da === null) return 1;
+      if (db === null) return -1;
+      return da - db;
+    });
+  }
+
+  renderTable(filtered);
+}
+
+function getLinks(r) {
+  return LINK_COLS.map(c => String(r[c] || '').trim()).filter(Boolean);
+}
+
+// 다양한 클라우드 저장소 URL 을 강제 다운로드 URL 로 변환
+function toDownloadUrl(url) {
+  if (!url) return url;
+
+  // ── Google Drive ──
+  let m = url.match(/drive\.google\.com\/file\/d\/([^/?#]+)/);
+  if (m) return `https://drive.google.com/uc?export=download&id=${m[1]}`;
+  m = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if (m) return `https://drive.google.com/uc?export=download&id=${m[1]}`;
+  m = url.match(/drive\.google\.com\/uc\?.*id=([^&]+)/);
+  if (m) return `https://drive.google.com/uc?export=download&id=${m[1]}`;
+
+  // ── Google Docs / Sheets / Slides ──
+  m = url.match(/docs\.google\.com\/document\/d\/([^/?#]+)/);
+  if (m) return `https://docs.google.com/document/d/${m[1]}/export?format=pdf`;
+  m = url.match(/docs\.google\.com\/spreadsheets\/d\/([^/?#]+)/);
+  if (m) return `https://docs.google.com/spreadsheets/d/${m[1]}/export?format=xlsx`;
+  m = url.match(/docs\.google\.com\/presentation\/d\/([^/?#]+)/);
+  if (m) return `https://docs.google.com/presentation/d/${m[1]}/export?format=pptx`;
+
+  // ── SharePoint / OneDrive ──
+  // :x: 엑셀, :w: 워드, :p: 파포, :b: PDF·브라우저뷰 → :u: 유니버설로 통일 후 download=1
+  if (/\.sharepoint\.com\//.test(url) || /1drv\.ms\//.test(url) || /onedrive\.live\.com\//.test(url)) {
+    // :b:/:w:/:p:/:x: → :u: (브라우저 뷰어 우회, 강제 파일 응답)
+    let u = url.replace(/\/:[bwpx]:\//i, '/:u:/');
+    const sep = u.includes('?') ? '&' : '?';
+    if (/[?&]download=1/.test(u)) return u;
+    return u + sep + 'download=1';
+  }
+
+  // ── Dropbox ──
+  if (/dropbox\.com\//.test(url)) {
+    return url.replace(/([?&])dl=0/, '$1dl=1').includes('dl=1')
+      ? url.replace(/([?&])dl=0/, '$1dl=1')
+      : url + (url.includes('?') ? '&' : '?') + 'dl=1';
+  }
+
+  return url;
+}
+
+function downloadLink(url) {
+  const dl = toDownloadUrl(url);
+  // 1순위: 앵커 download 속성으로 직접 트리거 (Content-Disposition: attachment 응답 시 페이지 이동 없이 다운로드)
+  try {
+    const a = document.createElement('a');
+    a.href = dl;
+    a.download = '';      // 파일명은 서버의 Content-Disposition 헤더에 맡김
+    a.rel = 'noopener';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 1000);
+    showToast('다운로드를 시작합니다...');
+  } catch(e) {
+    showToast('다운로드 실패: ' + e.message);
+  }
+}
+
+function renderLinks(links) {
+  if (!links.length) return '<span class="link-chip empty">링크 없음</span>';
+  return links.map((u, i) => {
+    return `<button type="button" class="link-chip" onclick="downloadLink('${esc(u)}')" title="다운로드: ${esc(u)}">⬇ ${i+1}</button>`;
+  }).join('');
+}
+
+function renderTable(rows) {
+  document.getElementById('table-count').textContent = `총 ${rows.length}건`;
+  if (!rows.length) {
+    document.getElementById('tbody').innerHTML =
+      '<tr><td colspan="8" class="no-data">조건에 맞는 계약이 없습니다.</td></tr>';
+    return;
+  }
+  document.getElementById('tbody').innerHTML = rows.map((r,i) => {
+    const s = statusOf(r);
+    const cls = 'bs-' + s.key;
+    const ddayCls = s.key === '만료' ? 'danger' : (s.key === '만료임박' ? 'warn' : '');
+    const links = getLinks(r);
+    return `<tr>
+      <td class="td-center" style="font-size:11px;color:#9ca3af">${i+1}</td>
+      <td class="td-vendor">${esc(r['협력업체'])}</td>
+      <td class="td-content">${esc(r['계약 내용'])}</td>
+      <td class="td-center" style="white-space:nowrap">${esc(normalizeDate(r['계약 일자']))}</td>
+      <td class="td-center" style="white-space:nowrap">
+        ${esc(normalizeDate(r['계약 만료 일자']))}${s.dday ? ` / <span class="dday ${ddayCls}">${s.dday}</span>` : ''}
+      </td>
+      <td class="td-center"><span class="badge ${cls}">${s.label}</span></td>
+      <td><div class="link-cell">${renderLinks(links)}</div></td>
+      <td class="td-center">
+        <button class="btn-row" onclick="openEditModal(${r._rowIndex})">수정</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── 엑셀 복사 ──
+function copyMainTable(btn) {
+  const rows = [];
+  rows.push(['#','협력업체','계약 내용','계약 일자','계약 만료 일자','상태','계약서 링크'].join('\t'));
+  [...document.querySelectorAll('#tbody tr')].forEach((tr, i) => {
+    if (tr.classList.contains('loading-row')) return;
+    const tds = tr.querySelectorAll('td');
+    if (tds.length < 8) return;
+    const linkText = [...tds[6].querySelectorAll('a.link-chip')].map(a => a.href).join(' | ');
+    rows.push([
+      tds[0].innerText.trim(),
+      tds[1].innerText.trim(),
+      tds[2].innerText.trim(),
+      tds[3].innerText.trim(),
+      tds[4].innerText.replace(/\s+/g,' ').trim(),
+      tds[5].innerText.trim(),
+      linkText
+    ].join('\t'));
+  });
+  navigator.clipboard.writeText(rows.join('\n')).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<span>✅</span> 복사 완료!';
+    btn.classList.add('copied');
+    showToast(`${rows.length - 1}행 데이터가 클립보드에 복사됐습니다.`);
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+  }).catch(e => showToast('복사 실패: ' + e.message));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast-msg');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── 모달: 등록/수정 ──
+function openAddModal() {
+  editingRowIndex = null;
+  document.getElementById('modal-title').textContent = '계약 등록';
+  document.getElementById('btn-save').textContent = '저장 → Google Sheets';
+  document.getElementById('btn-delete').style.display = 'none';
+  clearForm();
+  document.getElementById('f-start').value = today();
+  document.getElementById('modal-msg').textContent = '';
+  document.getElementById('modal').classList.add('open');
+}
+
+function openEditModal(rowIndex) {
+  const row = allRows.find(r => r._rowIndex === rowIndex);
+  if (!row) { showToast('행을 찾을 수 없습니다.'); return; }
+  editingRowIndex = rowIndex;
+  document.getElementById('modal-title').textContent = `계약 수정 (행 ${rowIndex})`;
+  document.getElementById('btn-save').textContent = '수정 저장';
+  document.getElementById('btn-delete').style.display = 'inline-flex';
+  document.getElementById('f-vendor').value  = row['협력업체']   || '';
+  document.getElementById('f-content').value = row['계약 내용']   || '';
+  document.getElementById('f-start').value   = normalizeDate(row['계약 일자']);
+  document.getElementById('f-end').value     = normalizeDate(row['계약 만료 일자']);
+  document.getElementById('f-links').value   = getLinks(row).join('\n');
+  document.getElementById('modal-msg').textContent = '';
+  document.getElementById('modal').classList.add('open');
+}
+
+function deleteFromModal() {
+  if (!editingRowIndex) return;
+  closeModal();
+  openConfirm(editingRowIndex);
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function clearForm() {
+  ['f-vendor','f-content','f-start','f-end','f-links'].forEach(id => document.getElementById(id).value = '');
+}
+
+async function saveRecord() {
+  const msg = document.getElementById('modal-msg');
+  const vendor  = document.getElementById('f-vendor').value.trim();
+  const content = document.getElementById('f-content').value.trim();
+  const start   = document.getElementById('f-start').value;
+  const end     = document.getElementById('f-end').value;
+  const linksRaw = document.getElementById('f-links').value;
+
+  if (!vendor)  { msg.className='form-msg err'; msg.textContent='협력업체는 필수입니다.'; return; }
+  if (!content) { msg.className='form-msg err'; msg.textContent='계약 내용은 필수입니다.'; return; }
+  if (!start)   { msg.className='form-msg err'; msg.textContent='계약 일자는 필수입니다.'; return; }
+  if (!end)     { msg.className='form-msg err'; msg.textContent='계약 만료 일자는 필수입니다.'; return; }
+
+  // 링크 파싱: 빈 줄 제거, 최대 3개
+  const links = linksRaw.split(/\n+/).map(s => s.trim()).filter(Boolean).slice(0, 3);
+
+  const row = {
+    '협력업체':       vendor,
+    '계약 내용':      content,
+    '계약 일자':      start,
+    '계약 만료 일자': end,
+    '계약서 링크 1':  links[0] || '',
+    '계약서 링크 2':  links[1] || '',
+    '계약서 링크 3':  links[2] || '',
+  };
+
+  msg.className='form-msg'; msg.textContent='저장 중...';
+  try {
+    if (editingRowIndex) {
+      await gasRequest({ action:'update', rowIndex: editingRowIndex, row });
+    } else {
+      await gasRequest({ action:'add', row });
+    }
+    msg.className='form-msg ok'; msg.textContent='✓ 저장 완료!';
+    setTimeout(() => { closeModal(); loadData(); }, 600);
+  } catch(e) {
+    msg.className='form-msg err'; msg.textContent='❌ 오류: '+e.message;
+  }
+}
+
+// ── 삭제 ──
+function openConfirm(rowIndex) {
+  const row = allRows.find(r => r._rowIndex === rowIndex);
+  if (!row) return;
+  deletingRowIndex = rowIndex;
+  document.getElementById('confirm-text').innerHTML =
+    `<strong>${esc(row['협력업체'])}</strong> — ${esc(row['계약 내용'])}<br>삭제된 데이터는 복구할 수 없습니다.`;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function closeConfirm() {
+  deletingRowIndex = null;
+  document.getElementById('confirm-modal').classList.remove('open');
+}
+async function doDelete() {
+  if (!deletingRowIndex) return;
+  const rowIndex = deletingRowIndex;
+  closeConfirm();
+  try {
+    await gasRequest({ action:'delete', rowIndex });
+    showToast('삭제 완료');
+    loadData();
+  } catch(e) {
+    showToast('삭제 실패: ' + e.message);
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QMS_10 글로벌 환경마크 세션 | MEDIPEEL</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system,'Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',Arial,sans-serif; font-size:13px; background:#f0f3f9; color:#1a2035; line-height:1.5; }
+
+.sec-bar { width:100%; background:#0a1230; color:rgba(255,255,255,.70); font-size:11px; font-weight:500; display:flex; align-items:center; gap:14px; padding:6px 20px; }
+.sec-bar strong { color:#8ab4ff; }
+.sec-bar .sep { width:1px; height:11px; background:rgba(255,255,255,.15); }
+.sec-right { margin-left:auto; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.sec-collect { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:rgba(255,255,255,.70); }
+.sec-collect-dot { width:6px; height:6px; border-radius:50%; background:#f87171; flex-shrink:0; animation:sec-blink 1.2s ease-in-out infinite; }
+@keyframes sec-blink { 0%,100%{opacity:1} 50%{opacity:.12} }
+.sec-ip-tag { font-size:11px; color:rgba(255,255,255,.55); white-space:nowrap; }
+.sec-ip-tag strong { color:#8ab4ff; }
+
+.header { background:linear-gradient(135deg,#0f1c45 0%,#1e3a82 60%,#1a306e 100%); color:white; padding:16px 28px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(15,28,69,.30); }
+.header-left { display:flex; align-items:center; gap:12px; }
+.back-btn { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:rgba(255,255,255,.60); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:6px; padding:4px 10px; text-decoration:none; transition:background .15s; }
+.back-btn:hover { background:rgba(255,255,255,.14); color:#fff; }
+.header-tag { font-size:10px; font-weight:700; color:rgba(255,255,255,.45); letter-spacing:.10em; text-transform:uppercase; margin-bottom:3px; }
+.header-title { font-size:17px; font-weight:700; letter-spacing:-.3px; }
+.header-right { text-align:right; }
+.header-sub { font-size:11px; color:rgba(255,255,255,.45); }
+.header-time { font-size:12px; color:rgba(255,255,255,.80); font-variant-numeric:tabular-nums; }
+.sync-status { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:rgba(255,255,255,.55); margin-top:3px; }
+.sync-dot { width:6px; height:6px; border-radius:50%; background:#0ea97e; animation:pulse 2s infinite; }
+.sync-dot.err { background:#e03c3c; animation:none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.header-logo { height:30px; width:auto; object-fit:contain; filter:brightness(0) invert(1); opacity:.92; }
+
+.main { padding:18px 24px 40px; max-width:1900px; margin:0 auto; }
+
+/* KPI */
+.kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+.kpi-card { background:#fff; border:1px solid #e4e8f2; border-radius:12px; padding:15px 18px; position:relative; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); cursor:pointer; transition:box-shadow .15s, border-color .15s, transform .10s; user-select:none; }
+.kpi-card:hover { box-shadow:0 4px 14px rgba(46,95,232,.14); border-color:#b0c4f8; transform:translateY(-1px); }
+.kpi-card.active { border-color:#2e5fe8; box-shadow:0 0 0 2px rgba(46,95,232,.25), 0 4px 14px rgba(46,95,232,.12); }
+.kpi-card.active .kpi-label { color:#2e5fe8; }
+.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:12px 12px 0 0; }
+.kpi-card.c1::before { background:linear-gradient(90deg,#2e5fe8,#7c5ce8); }
+.kpi-card.c2::before { background:linear-gradient(90deg,#0ea97e,#0bc4a8); }
+.kpi-card.c3::before { background:linear-gradient(90deg,#d98b10,#f0b030); }
+.kpi-card.c4::before { background:linear-gradient(90deg,#e03c3c,#f07070); }
+.kpi-label { font-size:10px; font-weight:600; color:#8a93b0; letter-spacing:.05em; text-transform:uppercase; margin-bottom:7px; }
+.kpi-value { font-size:26px; font-weight:700; color:#1a2035; letter-spacing:-.02em; line-height:1; }
+.kpi-value .unit { font-size:12px; font-weight:400; color:#8a93b0; margin-left:2px; }
+.kpi-sub { font-size:11px; color:#8a93b0; margin-top:4px; }
+.kpi-rate { font-size:11px; font-weight:600; margin-top:4px; }
+.kpi-rate.good { color:#0ea97e; }
+.kpi-rate.warn { color:#d98b10; }
+.kpi-rate.bad { color:#e03c3c; }
+.kpi-bar { height:4px; background:#eef0f5; border-radius:2px; margin-top:6px; overflow:hidden; }
+.kpi-bar-fill { height:100%; border-radius:2px; transition:width .6s ease; }
+.kpi-bar-fill.c2 { background:linear-gradient(90deg,#0ea97e,#0bc4a8); }
+.kpi-bar-fill.c3 { background:linear-gradient(90deg,#d98b10,#f0b030); }
+.kpi-bar-fill.c4 { background:linear-gradient(90deg,#e03c3c,#f07070); }
+
+/* TOOLBAR */
+.toolbar { display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.toolbar-left { display:flex; align-items:center; gap:8px; flex:1; flex-wrap:wrap; }
+.search-box { display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #d0d5e8; border-radius:8px; padding:6px 12px; min-width:200px; }
+.search-box input { border:none; outline:none; font-size:12px; font-family:inherit; background:transparent; flex:1; color:#1a2035; }
+.search-box input::placeholder { color:#b0b8cc; }
+.filter-select { padding:7px 10px; border:1px solid #d0d5e8; border-radius:8px; font-size:12px; font-family:inherit; background:#fff; color:#1a2035; outline:none; cursor:pointer; }
+.btn-refresh { padding:7px 12px; background:#fff; border:1px solid #d0d5e8; border-radius:8px; font-size:12px; font-family:inherit; color:#4a5470; cursor:pointer; }
+.btn-refresh:hover { background:#eef0f5; }
+
+/* TABLE */
+.table-wrap { background:#fff; border:1px solid #e4e8f2; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.table-inner { overflow-x:auto; max-height:75vh; }
+table { width:100%; border-collapse:collapse; font-size:12px; min-width:1200px; }
+thead th { background:#0f1c45; color:rgba(255,255,255,.90); padding:9px 10px; font-size:11px; font-weight:600; text-align:center; white-space:nowrap; letter-spacing:.03em; position:sticky; top:0; z-index:10; }
+thead th.th-sort { cursor:pointer; user-select:none; }
+thead th.th-sort:hover { background:#1a2f60; }
+.sort-ico { display:inline-block; width:12px; font-size:9px; margin-left:3px; opacity:.4; vertical-align:middle; }
+.sort-ico::after { content:'⇅'; }
+thead th.sort-asc  .sort-ico { opacity:1; }
+thead th.sort-asc  .sort-ico::after { content:'▲'; }
+thead th.sort-desc .sort-ico { opacity:1; }
+thead th.sort-desc .sort-ico::after { content:'▼'; }
+
+tbody tr { border-bottom:1px solid #f0f2f8; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:#f4f7ff; }
+tbody td { padding:8px 10px; vertical-align:middle; color:#2a3355; }
+.td-center { text-align:center; }
+.no-data { text-align:center; padding:48px 20px; color:#8a93b0; font-size:13px; }
+
+/* 상태 배지 */
+.badge { display:inline-block; border-radius:4px; padding:2px 7px; font-size:10px; font-weight:700; white-space:nowrap; line-height:1.6; }
+.bs-done { background:#dcfce7; color:#15803d; }
+.bs-na { background:#f3f4f6; color:#9ca3af; }
+.bs-need { background:#fee2e2; color:#b91c1c; }
+.bs-progress { background:#dbeafe; color:#1d4ed8; }
+.bs-same { background:#ede9fe; color:#6d28d9; }
+.bs-empty { background:#fef9c3; color:#854d0e; }
+
+/* 프로젝트 배지 */
+.proj-badge { display:inline-block; border-radius:4px; padding:2px 7px; font-size:10px; font-weight:600; white-space:nowrap; line-height:1.6; }
+.proj-peurenttang { background:#fce7f3; color:#9d174d; }
+.proj-benetton { background:#dbeafe; color:#1d4ed8; }
+.proj-cpnp { background:#dcfce7; color:#15803d; }
+.proj-scpn { background:#ede9fe; color:#6d28d9; }
+.proj-default { background:#f3f4f6; color:#4a5470; }
+
+.td-pname { font-weight:600; white-space:nowrap; min-width:200px; }
+
+.table-footer { display:flex; align-items:center; justify-content:space-between; padding:9px 14px; border-top:1px solid #f0f2f8; font-size:11px; color:#8a93b0; }
+
+/* 엑셀 복사 */
+.btn-copy-excel { display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border:1px solid #4caf50; border-radius:8px; background:#fff; color:#2e7d32; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; transition:all .18s; white-space:nowrap; }
+.btn-copy-excel:hover { background:#e8f5e9; }
+.btn-copy-excel.copied { background:#4caf50; color:#fff; pointer-events:none; }
+
+/* 토스트 */
+.toast-msg { position:fixed; bottom:30px; right:30px; background:#1a2035; color:#fff; padding:11px 18px; border-radius:9px; font-size:12px; font-weight:500; opacity:0; transform:translateY(10px); transition:all .25s; pointer-events:none; z-index:9999; }
+.toast-msg.show { opacity:1; transform:translateY(0); }
+
+.sec-footer { background:#0a1230; color:rgba(255,255,255,.35); font-size:11px; text-align:center; padding:12px 20px; line-height:1.7; margin-top:20px; }
+.sec-footer strong { color:rgba(255,255,255,.60); }
+
+.loading-row td { text-align:center; padding:48px 20px; color:#8a93b0; }
+.spinner { display:inline-block; width:18px; height:18px; border:2px solid #d0d5e8; border-top-color:#2e5fe8; border-radius:50%; animation:spin .7s linear infinite; margin-right:8px; vertical-align:middle; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* 프로젝트 필터 바 */
+.proj-filter-bar { display:flex; align-items:center; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+.proj-filter-label { font-size:11px; font-weight:600; color:#8a93b0; letter-spacing:.05em; margin-right:2px; white-space:nowrap; }
+.btn-proj { padding:5px 14px; border:1px solid #d0d5e8; border-radius:6px; background:#fff; font-size:12px; font-weight:600; font-family:inherit; color:#4a5470; cursor:pointer; transition:all .15s; }
+.btn-proj:hover { background:#f0f4ff; border-color:#b0c4f8; color:#2e5fe8; }
+.btn-proj.active { background:#2e5fe8; color:#fff; border-color:#2e5fe8; box-shadow:0 2px 6px rgba(46,95,232,.25); }
+
+/* 범례 */
+.legend-bar { display:flex; align-items:center; gap:12px; margin-bottom:12px; padding:8px 14px; background:#fff; border:1px solid #e4e8f2; border-radius:8px; font-size:11px; color:#8a93b0; }
+.legend-item { display:inline-flex; align-items:center; gap:4px; }
+
+/* ─── 서류 링크 버튼 ─── */
+.btn-docs { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:5px; border:1px solid #d0d5e8; background:#f4f6fb; font-size:11px; font-family:inherit; color:#4a5470; cursor:pointer; transition:all .12s; white-space:nowrap; }
+.btn-docs:hover { background:#2e5fe8; color:#fff; border-color:#2e5fe8; }
+.btn-docs.has-links { border-color:#0ea97e; color:#0ea97e; background:#f0fdf4; }
+.btn-docs.has-links:hover { background:#0ea97e; color:#fff; }
+.td-docs { cursor:default; user-select:none; }
+.doc-link-text { font-size:11px; font-weight:600; color:#2e5fe8; cursor:pointer; }
+.doc-link-text:hover { text-decoration:underline; }
+.doc-count { display:inline-flex; align-items:center; justify-content:center; min-width:16px; height:16px; border-radius:8px; background:#0ea97e; color:#fff; font-size:9px; font-weight:700; padding:0 4px; }
+
+/* ─── 서류 링크 모달 ─── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(4px); z-index:500; display:none; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff; border-radius:16px; width:560px; max-width:96vw; max-height:92vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,.22); overflow:hidden; }
+.modal-head { padding:18px 22px 14px; border-bottom:1px solid #eef0f5; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.modal-head-icon { width:36px; height:36px; border-radius:10px; background:rgba(46,95,232,.10); display:flex; align-items:center; justify-content:center; font-size:16px; }
+.modal-head-title { font-size:15px; font-weight:700; }
+.modal-head-sub { font-size:11px; color:#8a93b0; margin-top:1px; }
+.modal-close { margin-left:auto; width:28px; height:28px; border-radius:7px; background:#f0f2f8; border:none; cursor:pointer; font-size:14px; color:#4a5470; display:flex; align-items:center; justify-content:center; }
+.modal-close:hover { background:#e4e8f2; }
+.modal-body { flex:1; overflow-y:auto; padding:18px 22px; }
+.modal-foot { padding:12px 22px; border-top:1px solid #eef0f5; display:flex; justify-content:flex-end; gap:8px; flex-shrink:0; }
+.btn-cancel { padding:8px 16px; background:#f0f2f8; border:none; border-radius:8px; font-size:13px; font-family:inherit; color:#4a5470; cursor:pointer; }
+.btn-save { padding:8px 20px; background:linear-gradient(135deg,#2e5fe8,#1a4acc); border:none; border-radius:8px; font-size:13px; font-weight:700; font-family:inherit; color:#fff; cursor:pointer; }
+.btn-save:hover { opacity:.88; }
+
+/* 링크 리스트 */
+.link-list { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.link-item { display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f8f9fc; border:1px solid #e4e8f2; border-radius:8px; }
+.link-item a { flex:1; color:#2e5fe8; font-size:12px; font-weight:500; text-decoration:none; word-break:break-all; }
+.link-item a:hover { text-decoration:underline; }
+.link-label { font-size:11px; font-weight:600; color:#1a2035; min-width:60px; white-space:nowrap; }
+.btn-del-link { width:24px; height:24px; border-radius:6px; border:1px solid #e4e8f2; background:#fff; color:#e03c3c; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.btn-del-link:hover { background:#fee2e2; border-color:#fca5a5; }
+
+/* 링크 추가 폼 */
+.add-link-form { display:flex; gap:6px; align-items:flex-end; }
+.add-link-form .form-col { display:flex; flex-direction:column; gap:3px; }
+.add-link-form .form-col label { font-size:10px; font-weight:600; color:#8a93b0; letter-spacing:.04em; }
+.add-link-form input { padding:7px 10px; border:1px solid #d0d5e8; border-radius:6px; font-size:12px; font-family:inherit; color:#1a2035; outline:none; }
+.add-link-form input:focus { border-color:#2e5fe8; }
+.btn-add-link { padding:7px 14px; background:#2e5fe8; border:none; border-radius:6px; font-size:12px; font-weight:700; font-family:inherit; color:#fff; cursor:pointer; white-space:nowrap; flex-shrink:0; }
+.btn-add-link:hover { opacity:.85; }
+.no-links { text-align:center; padding:24px; color:#8a93b0; font-size:12px; }
+.cloud-sync-status { font-size:10px; color:#8a93b0; text-align:right; margin-top:6px; }
+.cloud-sync-status.ok { color:#0ea97e; }
+.cloud-sync-status.err { color:#e03c3c; }
+</style>
+</head>
+<body>
+
+<div class="sec-bar">
+  <span>🔒</span> <strong>MEDIPEEL 대외비 시스템</strong> — 임직원 전용 · 모든 접속 및 활동이 기록됩니다.
+  <span class="sep"></span>
+  무단 접근·정보 유출 시 사규 및 관련 법령에 따라 엄중 처벌됩니다.
+  <div class="sec-right">
+    <span class="sep"></span>
+    <span class="sec-collect">
+      <span class="sec-collect-dot"></span>
+      보안 정보 수집 중
+    </span>
+    <span class="sep"></span>
+    <span class="sec-ip-tag">접속 IP <strong id="sec-ip-val">확인 중...</strong></span>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <img src="../images/logo.png" alt="MEDIPEEL" class="header-logo">
+    <a class="back-btn" href="../index.html" onclick="if(window.self!==window.top){event.preventDefault();history.back();}">← 대시보드</a>
+    <div>
+      <div class="header-tag">QMS_10 · 품질 경영 대시보드</div>
+      <div class="header-title">글로벌 환경마크 세션</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">연결 중...</span>
+    </div>
+    <div class="header-time" id="clock"></div>
+    <div class="header-sub">환경마크_확보현황 · Google Sheets 실시간 동기화</div>
+  </div>
+</div>
+
+<div class="main">
+
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="search-inp" placeholder="검색어 1 (품명·코드·용기업체)" oninput="applyFilter()">
+      </div>
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="search-inp2" placeholder="검색어 2 (AND 조건)" oninput="applyFilter()">
+      </div>
+      <select class="filter-select" id="f-filter-period" onchange="applyFilter()">
+        <option value="">전체 시기</option>
+      </select>
+      <button class="btn-refresh" onclick="loadData()">↻ 새로고침</button>
+    </div>
+    <button class="btn-copy-excel" id="btn-excel" onclick="copyMainTable(this)">
+      <span>📋</span> 엑셀 복사
+    </button>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-inner">
+      <table id="main-table">
+        <thead>
+          <tr>
+            <th style="width:44px">No.</th>
+            <th class="th-sort" onclick="doSort('name')">품명<span class="sort-ico"></span></th>
+            <th class="th-sort" onclick="doSort('vendor')">1차 용기업체<span class="sort-ico"></span></th>
+            <th class="th-sort" onclick="doSort('period')">환경마크 확보 시기<span class="sort-ico"></span></th>
+            <th class="th-sort" onclick="doSort('france')">프랑스 환경마크<span class="sort-ico"></span></th>
+            <th class="th-sort" onclick="doSort('spain')">스페인 환경마크<span class="sort-ico"></span></th>
+            <th class="th-sort" onclick="doSort('italy')">이태리&amp;독일 환경마크<span class="sort-ico"></span></th>
+            <th style="width:90px">서류 링크</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr class="loading-row"><td colspan="8"><span class="spinner"></span>데이터 로딩 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span id="row-count">0건 표시</span>
+      <span id="last-sync">마지막 동기화: —</span>
+    </div>
+  </div>
+</div>
+
+<!-- 서류 링크 관리 모달 -->
+<div class="modal-overlay" id="doc-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-icon">📎</div>
+      <div>
+        <div class="modal-head-title" id="doc-modal-title">서류/문서 링크 관리</div>
+        <div class="modal-head-sub" id="doc-modal-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeDocModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- 등록된 링크 목록 (항상 표시) -->
+      <div class="link-list" id="doc-link-list"></div>
+      <div id="link-count-info" style="font-size:10px; color:#8a93b0; text-align:right; margin-bottom:10px;"></div>
+
+      <!-- 새 링크 추가 버튼 (비인증 상태) -->
+      <div id="add-link-trigger" style="text-align:center; margin:8px 0;">
+        <button onclick="showAdminGate()" style="padding:8px 20px; background:linear-gradient(135deg,#2e5fe8,#1a4acc); border:none; border-radius:8px; font-size:12px; font-weight:700; font-family:inherit; color:#fff; cursor:pointer;">+ 새 링크 추가</button>
+      </div>
+
+      <!-- 관리자 인증 영역 (새 링크 추가 클릭 후 표시) -->
+      <div id="admin-gate" style="display:none; margin:12px 0; padding:14px; background:#f8f9fc; border:1px solid #e4e8f2; border-radius:10px;">
+        <div style="font-size:12px; font-weight:600; color:#1a2035; margin-bottom:8px;">🔐 관리자 인증</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="password" id="inp-admin-pw" placeholder="비밀번호 입력" style="flex:1; padding:8px 12px; border:1px solid #d0d5e8; border-radius:6px; font-size:12px; font-family:inherit; outline:none;" onkeydown="if(event.key==='Enter')verifyAdmin()">
+          <button onclick="verifyAdmin()" style="padding:8px 16px; background:#2e5fe8; border:none; border-radius:6px; font-size:12px; font-weight:700; color:#fff; cursor:pointer; font-family:inherit; white-space:nowrap;">인증</button>
+        </div>
+        <div style="font-size:10px; color:#8a93b0; margin-top:6px;">링크 추가/삭제는 관리자 인증이 필요합니다.</div>
+      </div>
+
+      <!-- 인증 후 표시되는 입력 영역 -->
+      <div id="admin-edit-area" style="display:none; margin-top:10px; padding:14px; background:#f0f4ff; border:1px solid #dbeafe; border-radius:10px;">
+        <div style="font-size:11px; font-weight:600; color:#2e5fe8; margin-bottom:8px;">새 링크 등록</div>
+        <div class="add-link-form">
+          <div class="form-col" style="flex:1;">
+            <label>URL</label>
+            <input type="url" id="inp-link-url" placeholder="https://..." onkeydown="if(event.key==='Enter')addDocLink()">
+          </div>
+          <button class="btn-add-link" onclick="addDocLink()">+ 추가</button>
+        </div>
+      </div>
+      <div class="cloud-sync-status" id="cloud-status"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeDocModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-msg" id="toast"></div>
+
+<div class="sec-footer">
+  <strong>MEDIPEEL</strong> Quality Management System &nbsp;|&nbsp; 본 시스템에 포함된 모든 정보는 (주)메디필의 자산이며 기밀 사항입니다.<br>
+  허가 없는 외부 반출·복제·배포를 금지합니다. &copy; 2025 MEDIPEEL. All rights reserved.
+</div>
+
+<script>
+/* ─── 설정 ─── */
+const SHEET_ID = '1W_-5lt_qye1Qlyz_QLnAeXlci0uLT6U1tCPSka_VtwU';
+const GID = 0;
+const POLL_MS = 30000;
+
+/* ─── Google Apps Script 웹앱 URL (배포 후 여기에 붙여넣기) ─── */
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzuFKWAot19hU65uTV5_Swf0BFY1KW1_aeYNmsbCOS-bfpIGZqo6XsW2WaskaxObkI8/exec';
+
+let RAW = [];
+let FILTERED = [];
+let sortCol = '', sortDir = '';
+let pollTimer = null;
+let currentRowNo = '';
+let currentRowName = '';
+let isAdmin = false;
+const ADMIN_PW = '1234567';
+const MAX_LINKS = 5;
+
+/* ─── 시계 ─── */
+function tickClock() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' +
+    String(n.getDate()).padStart(2,'0') + ' ' +
+    String(n.getHours()).padStart(2,'0') + ':' +
+    String(n.getMinutes()).padStart(2,'0') + ':' +
+    String(n.getSeconds()).padStart(2,'0');
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+/* ─── IP ─── */
+fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{document.getElementById('sec-ip-val').textContent=d.ip;}).catch(()=>{document.getElementById('sec-ip-val').textContent='비공개';});
+
+/* ═══════════════════════════════════════
+   서류 링크 모듈 (구글시트 K~O열 실시간 동기화)
+   ═══════════════════════════════════════ */
+
+/* ─── 행에서 링크 배열 추출 ─── */
+function getRowLinks(row) {
+  return row.urls.filter(u => u);
+}
+
+/* ─── 현재 모달 대상 행 찾기 ─── */
+function findCurrentRow() {
+  return RAW.find(r => r.no === currentRowNo);
+}
+
+/* ─── 구글 드라이브 URL → 다운로드 URL 변환 ─── */
+function toDriveDownload(url) {
+  // SharePoint / OneDrive → download=1 추가
+  if (url.includes('sharepoint.com') || url.includes('1drv.ms') || url.includes('onedrive.live.com')) {
+    return url + (url.includes('?') ? '&' : '?') + 'download=1';
+  }
+  // Google Drive /file/d/FILE_ID/ 패턴
+  let m = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/);
+  if (m) return 'https://drive.google.com/uc?export=download&id=' + m[1];
+  // Google Drive open?id=FILE_ID 패턴
+  m = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if (m) return 'https://drive.google.com/uc?export=download&id=' + m[1];
+  // Google Sheets → xlsx 다운로드
+  m = url.match(/docs\.google\.com\/spreadsheets\/d\/([^\/]+)/);
+  if (m) return 'https://docs.google.com/spreadsheets/d/' + m[1] + '/export?format=xlsx';
+  // 그 외 URL은 그대로
+  return url;
+}
+
+/* ─── 구글시트에 링크 저장 (Apps Script) ─── */
+async function saveLinksToSheet(rowNo, links) {
+  if (!GAS_URL || GAS_URL.includes('YOUR_')) return true;
+  const statusEl = document.getElementById('cloud-status');
+  try {
+    const params = new URLSearchParams();
+    params.set('action', 'save_links');
+    params.set('rowNo', rowNo);
+    params.set('links', JSON.stringify(links));
+    const res = await fetch(GAS_URL + '?' + params.toString(), { redirect: 'follow' });
+    const data = await res.json();
+    if (data.success) {
+      if (statusEl) { statusEl.textContent = '☁ 구글시트 저장 완료'; statusEl.className = 'cloud-sync-status ok'; }
+      setTimeout(loadData, 2000);
+      return true;
+    } else {
+      toast('구글시트 저장 실패: ' + (data.error || ''));
+      if (statusEl) { statusEl.textContent = '☁ 저장 실패'; statusEl.className = 'cloud-sync-status err'; }
+      return false;
+    }
+  } catch {
+    toast('구글시트 저장 실패 — 네트워크를 확인하세요.');
+    if (statusEl) { statusEl.textContent = '☁ 저장 실패'; statusEl.className = 'cloud-sync-status err'; }
+    return false;
+  }
+}
+
+/* ─── 새 링크 추가 버튼 → 인증 게이트 표시 ─── */
+function showAdminGate() {
+  if (isAdmin) {
+    document.getElementById('admin-gate').style.display = 'none';
+    document.getElementById('admin-edit-area').style.display = 'block';
+    document.getElementById('add-link-trigger').style.display = 'none';
+    document.getElementById('inp-link-url').value = '';
+    document.getElementById('inp-link-url').focus();
+  } else {
+    document.getElementById('admin-gate').style.display = 'block';
+    document.getElementById('add-link-trigger').style.display = 'none';
+    document.getElementById('inp-admin-pw').value = '';
+    document.getElementById('inp-admin-pw').focus();
+  }
+}
+
+/* ─── 관리자 인증 ─── */
+function verifyAdmin() {
+  const pw = document.getElementById('inp-admin-pw').value;
+  if (pw === ADMIN_PW) {
+    isAdmin = true;
+    document.getElementById('admin-gate').style.display = 'none';
+    document.getElementById('admin-edit-area').style.display = 'block';
+    document.getElementById('inp-link-url').value = '';
+    document.getElementById('inp-link-url').focus();
+    renderDocLinks();
+    toast('관리자 인증 완료');
+  } else {
+    toast('비밀번호가 올바르지 않습니다.');
+    document.getElementById('inp-admin-pw').value = '';
+    document.getElementById('inp-admin-pw').focus();
+  }
+}
+
+/* ─── 모달 열기/닫기 ─── */
+function openDocModal(rowNo, name) {
+  currentRowNo = rowNo;
+  currentRowName = name;
+  document.getElementById('doc-modal-title').textContent = '서류/문서 링크 관리';
+  document.getElementById('doc-modal-sub').textContent = name;
+  document.getElementById('doc-modal').classList.add('open');
+  document.getElementById('cloud-status').textContent = '';
+  document.getElementById('admin-gate').style.display = 'none';
+  document.getElementById('admin-edit-area').style.display = 'none';
+  const row = findCurrentRow();
+  const links = row ? getRowLinks(row) : [];
+  if (links.length >= MAX_LINKS) {
+    document.getElementById('add-link-trigger').style.display = 'none';
+  } else {
+    document.getElementById('add-link-trigger').style.display = 'block';
+  }
+  renderDocLinks();
+}
+
+function closeDocModal() {
+  document.getElementById('doc-modal').classList.remove('open');
+  currentRowNo = '';
+  renderTable();
+}
+
+function renderDocLinks() {
+  const list = document.getElementById('doc-link-list');
+  const row = findCurrentRow();
+  const links = row ? getRowLinks(row) : [];
+  const countEl = document.getElementById('link-count-info');
+  countEl.textContent = `${links.length} / ${MAX_LINKS}개 등록`;
+
+  if (!links.length) {
+    list.innerHTML = '<div class="no-links">등록된 서류 링크가 없습니다.</div>';
+    return;
+  }
+  list.innerHTML = links.map((url, i) => {
+    const dlUrl = toDriveDownload(url);
+    const displayUrl = url.length > 60 ? url.substring(0, 60) + '...' : url;
+    return `
+    <div class="link-item">
+      <span class="link-label">URL ${i + 1}</span>
+      <a href="${dlUrl}" target="_blank" rel="noopener" download>${displayUrl}</a>
+      ${isAdmin ? `<button class="btn-del-link" onclick="removeDocLink(${i})" title="삭제">✕</button>` : ''}
+    </div>`;
+  }).join('');
+
+  const trigger = document.getElementById('add-link-trigger');
+  if (links.length >= MAX_LINKS) {
+    trigger.style.display = 'none';
+    document.getElementById('admin-edit-area').style.display = 'none';
+  }
+}
+
+async function addDocLink() {
+  const url = document.getElementById('inp-link-url').value.trim();
+  if (!url) { toast('URL을 입력하세요.'); return; }
+  const row = findCurrentRow();
+  if (!row) return;
+  const links = getRowLinks(row);
+  if (links.length >= MAX_LINKS) { toast(`최대 ${MAX_LINKS}개까지 등록 가능합니다.`); return; }
+
+  links.push(url);
+  // urls 배열 업데이트 (5칸 고정)
+  for (let i = 0; i < 5; i++) row.urls[i] = links[i] || '';
+
+  const ok = await saveLinksToSheet(row.no, row.urls);
+  if (!ok) { row.urls = [...links]; return; }
+
+  document.getElementById('inp-link-url').value = '';
+  renderDocLinks();
+  toast('링크가 추가되었습니다.');
+}
+
+async function removeDocLink(idx) {
+  const row = findCurrentRow();
+  if (!row) return;
+  const links = getRowLinks(row);
+  links.splice(idx, 1);
+  for (let i = 0; i < 5; i++) row.urls[i] = links[i] || '';
+
+  const ok = await saveLinksToSheet(row.no, row.urls);
+  if (!ok) return;
+
+  renderDocLinks();
+  toast('링크가 삭제되었습니다.');
+}
+
+/* ─── 데이터 로딩 (Google Sheets) ─── */
+function loadData() {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}&t=${Date.now()}`;
+  document.getElementById('sync-dot').classList.remove('err');
+  document.getElementById('sync-label').textContent = '동기화 중...';
+
+  fetch(url)
+    .then(r => {
+      if (!r.ok) throw new Error('fetch failed');
+      return r.text();
+    })
+    .then(csv => {
+      RAW = parseCSV(csv);
+      buildPeriodFilter();
+      applyFilter();
+      const now = new Date();
+      document.getElementById('sync-dot').classList.remove('err');
+      document.getElementById('sync-label').textContent = 'Google Sheets 연결됨';
+      document.getElementById('last-sync').textContent =
+        '마지막 동기화: ' + String(now.getHours()).padStart(2,'0') + ':' +
+        String(now.getMinutes()).padStart(2,'0') + ':' +
+        String(now.getSeconds()).padStart(2,'0');
+    })
+    .catch(() => {
+      document.getElementById('sync-dot').classList.add('err');
+      document.getElementById('sync-label').textContent = '연결 오류';
+      toast('데이터 로딩 실패 — 네트워크를 확인하세요.');
+    });
+}
+
+/* ─── CSV 파서 ─── */
+function parseCSV(text) {
+  const lines = text.split('\n');
+  if (lines.length < 2) return [];
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cells = splitCSVLine(lines[i]);
+    if (cells.length < 10) continue;
+    const no = cells[0].trim();
+    if (!no) continue;
+    rows.push({
+      no: no,
+      code: cells[1].trim(),
+      name: cells[2].trim(),
+      vendor: cells[3].trim(),
+      project: cells[4].trim(),
+      period: cells[5].trim(),
+      france: cells[6].trim(),
+      spain: cells[7].trim(),
+      italy: cells[8].trim(),
+      packaging: cells[9].trim(),
+      urls: [
+        (cells[10] || '').trim(),
+        (cells[11] || '').trim(),
+        (cells[12] || '').trim(),
+        (cells[13] || '').trim(),
+        (cells[14] || '').trim()
+      ]
+    });
+  }
+  return rows;
+}
+
+function splitCSVLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"' && line[i+1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') inQ = false;
+      else cur += ch;
+    } else {
+      if (ch === '"') inQ = true;
+      else if (ch === ',') { result.push(cur); cur = ''; }
+      else cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+/* ─── 상태 분류 ─── */
+function classifyStatus(val) {
+  const v = val.toLowerCase().replace(/\s/g, '');
+  if (!v) return 'empty';
+  if (v === 'na' || v === 'n/a') return 'hidden';
+  if (v.includes('확보완료') || v.includes('기확보') || v === '확보') return 'done';
+  if (v.includes('동일') || v.match(/^\d+번동일$/)) return 'same';
+  if (v.includes('진행') || v.includes('확보중')) return 'progress';
+  if (v.includes('미확보') || v.includes('필요')) return 'need';
+  if (v.includes('확보')) return 'done';
+  return 'progress';
+}
+
+function badgeHTML(val) {
+  const cls = classifyStatus(val);
+  if (cls === 'hidden') return '';
+  const map = { done:'bs-done', need:'bs-need', progress:'bs-progress', same:'bs-same', empty:'bs-empty' };
+  const label = val || '—';
+  return `<span class="badge ${map[cls] || 'bs-empty'}">${label}</span>`;
+}
+
+/* ─── 프로젝트 배지 ─── */
+function projBadge(val) {
+  if (!val) return '';
+  const v = val.toLowerCase();
+  let cls = 'proj-default';
+  if (v.includes('쁘렝땅') || v.includes('팝업')) cls = 'proj-peurenttang';
+  else if (v.includes('베네통')) cls = 'proj-benetton';
+  else if (v.includes('cpnp')) cls = 'proj-cpnp';
+  else if (v.includes('scpn')) cls = 'proj-scpn';
+  return `<span class="proj-badge ${cls}">${val}</span>`;
+}
+
+/* ─── 시기 필터 ─── */
+function buildPeriodFilter() {
+  const set = new Set();
+  RAW.forEach(r => { if (r.period) set.add(r.period); });
+  const sel = document.getElementById('f-filter-period');
+  sel.innerHTML = '<option value="">전체 시기</option>';
+  [...set].sort().forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    sel.appendChild(opt);
+  });
+}
+
+/* ─── 필터 & 렌더 ─── */
+function applyFilter() {
+  const q = document.getElementById('search-inp').value.toLowerCase().trim();
+  const q2 = document.getElementById('search-inp2').value.toLowerCase().trim();
+  const period = document.getElementById('f-filter-period').value;
+
+  FILTERED = RAW.filter(r => {
+    const hay = (r.code + ' ' + r.name + ' ' + r.vendor + ' ' + r.project).toLowerCase();
+    if (q && !hay.includes(q)) return false;
+    if (q2 && !hay.includes(q2)) return false;
+    if (period && r.period !== period) return false;
+    return true;
+  });
+
+  if (sortCol) doSortInternal();
+  renderTable();
+}
+
+/* ─── 정렬 ─── */
+function doSort(col) {
+  if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortCol = col; sortDir = 'asc'; }
+
+  document.querySelectorAll('.th-sort').forEach(th => th.classList.remove('sort-asc','sort-desc'));
+  const idx = ['name','vendor','period','france','spain','italy'].indexOf(col);
+  const ths = document.querySelectorAll('.th-sort');
+  if (ths[idx]) ths[idx].classList.add('sort-' + sortDir);
+
+  doSortInternal();
+  renderTable();
+}
+
+function doSortInternal() {
+  const dir = sortDir === 'desc' ? -1 : 1;
+  FILTERED.sort((a, b) => {
+    const va = (a[sortCol] || '').toLowerCase();
+    const vb = (b[sortCol] || '').toLowerCase();
+    return va < vb ? -dir : va > vb ? dir : 0;
+  });
+}
+
+/* ─── 테이블 렌더 ─── */
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+  if (!FILTERED.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="no-data">조건에 맞는 데이터가 없습니다.</td></tr>';
+    document.getElementById('row-count').textContent = '0건 표시';
+    return;
+  }
+
+  let html = '';
+  FILTERED.forEach((r, i) => {
+    const links = r.urls.filter(u => u);
+    const hasLinks = links.length > 0;
+    const escapedName = r.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+    html += `<tr>
+      <td class="td-center">${i + 1}</td>
+      <td class="td-pname">${r.name}</td>
+      <td class="td-center">${r.vendor || '-'}</td>
+      <td class="td-center">${r.period}</td>
+      <td class="td-center">${badgeHTML(r.france)}</td>
+      <td class="td-center">${badgeHTML(r.spain)}</td>
+      <td class="td-center">${badgeHTML(r.italy)}</td>
+      <td class="td-center td-docs" onclick="openDocModal('${r.no}','${escapedName}')">
+        ${hasLinks ? '<span class="doc-link-text">파일 다운로드</span>' : ''}
+      </td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+  document.getElementById('row-count').textContent = FILTERED.length + '건 표시 / 전체 ' + RAW.length + '건';
+}
+
+/* ─── 엑셀 복사 ─── */
+function copyMainTable(btn) {
+  const headers = ['No.', '품목코드', '품명', '1차 용기업체', '프로젝트', '시기', '프랑스 환경마크', '스페인 환경마크', '이태리&독일 환경마크'];
+  let tsv = headers.join('\t') + '\n';
+  FILTERED.forEach((r, i) => {
+    tsv += [i+1, r.code, r.name, r.vendor, r.project, r.period, r.france, r.spain, r.italy].join('\t') + '\n';
+  });
+  navigator.clipboard.writeText(tsv).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '<span>✓</span> 복사 완료';
+    toast('테이블이 클립보드에 복사되었습니다.');
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '<span>📋</span> 엑셀 복사'; }, 2000);
+  });
+}
+
+/* ─── 토스트 ─── */
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ─── 자동 폴링 ─── */
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(loadData, POLL_MS);
+}
+
+/* ─── 초기화 ─── */
+loadData();
+startPolling();
+</script>
+</body>
+</html>

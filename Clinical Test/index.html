@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QMS_11 스킨이데아 CSR 세션 | MEDIPEEL</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system,'Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',Arial,sans-serif; font-size:13px; background:#f0f3f9; color:#1a2035; line-height:1.5; }
+
+.sec-bar { width:100%; background:#0a1230; color:rgba(255,255,255,.70); font-size:11px; font-weight:500; display:flex; align-items:center; gap:14px; padding:6px 20px; }
+.sec-bar strong { color:#8ab4ff; }
+.sec-bar .sep { width:1px; height:11px; background:rgba(255,255,255,.15); }
+.sec-right { margin-left:auto; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.sec-collect { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:rgba(255,255,255,.70); }
+.sec-collect-dot { width:6px; height:6px; border-radius:50%; background:#f87171; flex-shrink:0; animation:sec-blink 1.2s ease-in-out infinite; }
+@keyframes sec-blink { 0%,100%{opacity:1} 50%{opacity:.12} }
+.sec-ip-tag { font-size:11px; color:rgba(255,255,255,.55); white-space:nowrap; }
+.sec-ip-tag strong { color:#8ab4ff; }
+
+.header { background:linear-gradient(135deg,#0f1c45 0%,#1e3a82 60%,#1a306e 100%); color:white; padding:16px 28px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(15,28,69,.30); }
+.header-left { display:flex; align-items:center; gap:12px; }
+.back-btn { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:rgba(255,255,255,.60); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:6px; padding:4px 10px; text-decoration:none; transition:background .15s; }
+.back-btn:hover { background:rgba(255,255,255,.14); color:#fff; }
+.header-tag { font-size:10px; font-weight:700; color:rgba(255,255,255,.45); letter-spacing:.10em; text-transform:uppercase; margin-bottom:3px; }
+.header-title { font-size:17px; font-weight:700; letter-spacing:-.3px; }
+.header-right { text-align:right; }
+.header-sub { font-size:11px; color:rgba(255,255,255,.45); }
+.header-time { font-size:12px; color:rgba(255,255,255,.80); font-variant-numeric:tabular-nums; }
+.sync-status { display:inline-flex; align-items:center; gap:5px; font-size:11px; color:rgba(255,255,255,.55); margin-top:3px; }
+.sync-dot { width:6px; height:6px; border-radius:50%; background:#0ea97e; animation:pulse 2s infinite; }
+.sync-dot.err { background:#e03c3c; animation:none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.header-logo { height:30px; width:auto; object-fit:contain; filter:brightness(0) invert(1); opacity:.92; }
+
+.main { padding:18px 24px 40px; max-width:1900px; margin:0 auto; }
+
+/* KPI */
+.kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+.kpi-card { background:#fff; border:1px solid #e4e8f2; border-radius:12px; padding:15px 18px; position:relative; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); cursor:pointer; transition:box-shadow .15s, border-color .15s, transform .10s; user-select:none; }
+.kpi-card:hover { box-shadow:0 4px 14px rgba(46,95,232,.14); border-color:#b0c4f8; transform:translateY(-1px); }
+.kpi-card.active { border-color:#2e5fe8; box-shadow:0 0 0 2px rgba(46,95,232,.25), 0 4px 14px rgba(46,95,232,.12); }
+.kpi-card.active .kpi-label { color:#2e5fe8; }
+.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:12px 12px 0 0; }
+.kpi-card.c1::before { background:linear-gradient(90deg,#2e5fe8,#7c5ce8); }
+.kpi-card.c2::before { background:linear-gradient(90deg,#0ea97e,#0bc4a8); }
+.kpi-card.c3::before { background:linear-gradient(90deg,#d98b10,#f0b030); }
+.kpi-card.c4::before { background:linear-gradient(90deg,#e03c3c,#f07070); }
+.kpi-label { font-size:10px; font-weight:600; color:#8a93b0; letter-spacing:.05em; text-transform:uppercase; margin-bottom:7px; }
+.kpi-value { font-size:26px; font-weight:700; color:#1a2035; letter-spacing:-.02em; line-height:1; }
+.kpi-value .unit { font-size:12px; font-weight:400; color:#8a93b0; margin-left:2px; }
+.kpi-sub { font-size:11px; color:#8a93b0; margin-top:4px; }
+.kpi-rate { font-size:11px; font-weight:600; margin-top:4px; }
+.kpi-rate.good { color:#0ea97e; }
+.kpi-rate.warn { color:#d98b10; }
+.kpi-rate.bad { color:#e03c3c; }
+.kpi-bar { height:4px; background:#eef0f5; border-radius:2px; margin-top:6px; overflow:hidden; }
+.kpi-bar-fill { height:100%; border-radius:2px; transition:width .6s ease; }
+.kpi-bar-fill.c2 { background:linear-gradient(90deg,#0ea97e,#0bc4a8); }
+.kpi-bar-fill.c3 { background:linear-gradient(90deg,#d98b10,#f0b030); }
+.kpi-bar-fill.c4 { background:linear-gradient(90deg,#e03c3c,#f07070); }
+
+/* TOOLBAR */
+.toolbar { display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.toolbar-left { display:flex; align-items:center; gap:8px; flex:1; flex-wrap:wrap; }
+.search-box { display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #d0d5e8; border-radius:8px; padding:6px 12px; min-width:240px; }
+.search-box input { border:none; outline:none; font-size:12px; font-family:inherit; background:transparent; flex:1; color:#1a2035; }
+.search-box input::placeholder { color:#b0b8cc; }
+.filter-select { padding:7px 10px; border:1px solid #d0d5e8; border-radius:8px; font-size:12px; font-family:inherit; background:#fff; color:#1a2035; outline:none; cursor:pointer; }
+.btn-refresh { padding:7px 12px; background:#fff; border:1px solid #d0d5e8; border-radius:8px; font-size:12px; font-family:inherit; color:#4a5470; cursor:pointer; }
+.btn-refresh:hover { background:#eef0f5; }
+
+/* 효능태그 필터 */
+.tag-filter-bar { display:flex; align-items:center; gap:6px; margin-bottom:10px; flex-wrap:wrap; padding:8px 12px; background:#fff; border:1px solid #e4e8f2; border-radius:10px; }
+.tag-filter-label { font-size:11px; font-weight:600; color:#8a93b0; letter-spacing:.05em; margin-right:4px; white-space:nowrap; }
+.btn-tag { padding:4px 11px; border:1px solid #d0d5e8; border-radius:14px; background:#fff; font-size:11px; font-weight:600; font-family:inherit; color:#4a5470; cursor:pointer; transition:all .15s; }
+.btn-tag:hover { background:#f0f4ff; border-color:#b0c4f8; color:#2e5fe8; }
+.btn-tag.active { background:#2e5fe8; color:#fff; border-color:#2e5fe8; box-shadow:0 2px 6px rgba(46,95,232,.25); }
+.btn-tag-clear { padding:4px 11px; border:1px solid #fca5a5; border-radius:14px; background:#fff; font-size:11px; font-weight:600; color:#b91c1c; cursor:pointer; }
+.btn-tag-clear:hover { background:#fee2e2; }
+
+/* TABLE */
+.table-wrap { background:#fff; border:1px solid #e4e8f2; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.table-inner { overflow-x:auto; max-height:72vh; }
+table { width:100%; border-collapse:collapse; font-size:12px; min-width:1200px; }
+thead th { background:#0f1c45; color:rgba(255,255,255,.90); padding:9px 10px; font-size:11px; font-weight:600; text-align:center; white-space:nowrap; letter-spacing:.03em; position:sticky; top:0; z-index:10; }
+thead th.th-sort { cursor:pointer; user-select:none; }
+thead th.th-sort:hover { background:#1a2f60; }
+.sort-ico { display:inline-block; width:12px; font-size:9px; margin-left:3px; opacity:.4; vertical-align:middle; }
+.sort-ico::after { content:'⇅'; }
+thead th.sort-asc  .sort-ico { opacity:1; }
+thead th.sort-asc  .sort-ico::after { content:'▲'; }
+thead th.sort-desc .sort-ico { opacity:1; }
+thead th.sort-desc .sort-ico::after { content:'▼'; }
+
+tbody tr { border-bottom:1px solid #f0f2f8; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:#f4f7ff; }
+tbody td { padding:8px 10px; vertical-align:middle; color:#2a3355; }
+.td-center { text-align:center; }
+.no-data { text-align:center; padding:48px 20px; color:#8a93b0; font-size:13px; }
+
+.td-pname { font-weight:600; min-width:180px; max-width:240px; }
+.td-code { font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11px; font-weight:600; color:#2e5fe8; white-space:nowrap; }
+.td-title { color:#4a5470; max-width:380px; line-height:1.45; }
+
+/* 상태 배지 */
+.badge { display:inline-block; border-radius:4px; padding:2px 7px; font-size:10px; font-weight:700; white-space:nowrap; line-height:1.6; }
+.bs-done { background:#dcfce7; color:#15803d; }
+.bs-na { background:#f3f4f6; color:#9ca3af; }
+.bs-need { background:#fee2e2; color:#b91c1c; }
+.bs-progress { background:#dbeafe; color:#1d4ed8; }
+
+/* 시험종류 배지 */
+.type-badge { display:inline-block; border-radius:4px; padding:2px 8px; font-size:10px; font-weight:700; white-space:nowrap; line-height:1.6; }
+.type-효능 { background:#dbeafe; color:#1d4ed8; }
+.type-흡수도 { background:#fce7f3; color:#9d174d; }
+.type-항균 { background:#dcfce7; color:#15803d; }
+.type-설문인체적용시험 { background:#ede9fe; color:#6d28d9; }
+.type-설문 { background:#ede9fe; color:#6d28d9; }
+.type-기타 { background:#f3f4f6; color:#4a5470; }
+
+/* 효능태그(작은) */
+.tag-chip { display:inline-block; background:#f0f4ff; color:#2e5fe8; border:1px solid #dbe5ff; border-radius:4px; padding:1px 6px; font-size:10px; font-weight:600; margin:1px 2px 1px 0; }
+
+.table-footer { display:flex; align-items:center; justify-content:space-between; padding:9px 14px; border-top:1px solid #f0f2f8; font-size:11px; color:#8a93b0; }
+
+/* 링크 버튼 */
+.btn-link { display:inline-flex; align-items:center; gap:3px; padding:3px 9px; border-radius:5px; font-size:10px; font-weight:700; font-family:inherit; cursor:pointer; transition:all .12s; white-space:nowrap; text-decoration:none; }
+.btn-link.kor { border:1px solid #2e5fe8; background:#fff; color:#2e5fe8; }
+.btn-link.kor:hover { background:#2e5fe8; color:#fff; }
+.btn-link.eng { border:1px solid #0ea97e; background:#fff; color:#0ea97e; }
+.btn-link.eng:hover { background:#0ea97e; color:#fff; }
+.btn-link.disabled { border:1px solid #e4e8f2; background:#f8f9fc; color:#b0b8cc; cursor:not-allowed; }
+.btn-link.disabled:hover { background:#f8f9fc; color:#b0b8cc; }
+.link-cell { display:flex; gap:4px; justify-content:center; }
+
+/* 페이지네이션 */
+.pager { display:flex; align-items:center; gap:4px; }
+.pager button { min-width:28px; height:26px; border:1px solid #d0d5e8; border-radius:6px; background:#fff; font-size:11px; font-family:inherit; color:#4a5470; cursor:pointer; padding:0 8px; }
+.pager button:hover:not(:disabled) { background:#eef0f5; }
+.pager button.active { background:#2e5fe8; color:#fff; border-color:#2e5fe8; }
+.pager button:disabled { color:#c0c8da; cursor:not-allowed; }
+
+/* 엑셀 복사 */
+.btn-copy-excel { display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border:1px solid #4caf50; border-radius:8px; background:#fff; color:#2e7d32; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer; transition:all .18s; white-space:nowrap; }
+.btn-copy-excel:hover { background:#e8f5e9; }
+.btn-copy-excel.copied { background:#4caf50; color:#fff; pointer-events:none; }
+
+/* 토스트 */
+.toast-msg { position:fixed; bottom:30px; right:30px; background:#1a2035; color:#fff; padding:11px 18px; border-radius:9px; font-size:12px; font-weight:500; opacity:0; transform:translateY(10px); transition:all .25s; pointer-events:none; z-index:9999; }
+.toast-msg.show { opacity:1; transform:translateY(0); }
+
+.sec-footer { background:#0a1230; color:rgba(255,255,255,.35); font-size:11px; text-align:center; padding:12px 20px; line-height:1.7; margin-top:20px; }
+.sec-footer strong { color:rgba(255,255,255,.60); }
+
+.loading-row td { text-align:center; padding:48px 20px; color:#8a93b0; }
+.spinner { display:inline-block; width:18px; height:18px; border:2px solid #d0d5e8; border-top-color:#2e5fe8; border-radius:50%; animation:spin .7s linear infinite; margin-right:8px; vertical-align:middle; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+@media (max-width: 900px) {
+  .kpi-grid { grid-template-columns:repeat(2,1fr); }
+  .main { padding:14px 12px 30px; }
+}
+</style>
+</head>
+<body>
+
+<div class="sec-bar">
+  <span>🔒</span> <strong>MEDIPEEL 대외비 시스템</strong> — 임직원 전용 · 모든 접속 및 활동이 기록됩니다.
+  <span class="sep"></span>
+  무단 접근·정보 유출 시 사규 및 관련 법령에 따라 엄중 처벌됩니다.
+  <div class="sec-right">
+    <span class="sep"></span>
+    <span class="sec-collect">
+      <span class="sec-collect-dot"></span>
+      보안 정보 수집 중
+    </span>
+    <span class="sep"></span>
+    <span class="sec-ip-tag">접속 IP <strong id="sec-ip-val">확인 중...</strong></span>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <img src="../images/logo.png" alt="MEDIPEEL" class="header-logo" onerror="this.style.display='none'">
+    <a class="back-btn" href="../index.html" onclick="if(window.self!==window.top){event.preventDefault();history.back();}">← 대시보드</a>
+    <div>
+      <div class="header-tag">QMS_11</div>
+      <div class="header-title">스킨이데아 CSR (Clinical Study Report) 세션</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">연결 중...</span>
+    </div>
+    <div class="header-time" id="clock"></div>
+    <div class="header-sub">한피연 의뢰 보고서 · Google Sheets 실시간 동기화</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card c1" id="kpi-total" onclick="kpiClick('total')">
+      <div class="kpi-label">총 보고서</div>
+      <div class="kpi-value" id="kpi-total-val">—<span class="unit">건</span></div>
+      <div class="kpi-sub" id="kpi-total-sub">전체 인체적용시험 보고서</div>
+    </div>
+    <div class="kpi-card c2" id="kpi-thisyear" onclick="kpiClick('thisyear')">
+      <div class="kpi-label">올해 발행</div>
+      <div class="kpi-value" id="kpi-thisyear-val">—<span class="unit">건</span></div>
+      <div class="kpi-sub" id="kpi-thisyear-sub">올해 국문 발행 기준</div>
+    </div>
+    <div class="kpi-card c3" id="kpi-engdone" onclick="kpiClick('engdone')">
+      <div class="kpi-label">영문 보유</div>
+      <div class="kpi-value" id="kpi-engdone-val">—<span class="unit">건</span></div>
+      <div class="kpi-rate good" id="kpi-engdone-rate">—</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill c3" id="kpi-engdone-bar" style="width:0%"></div></div>
+    </div>
+    <div class="kpi-card c4" id="kpi-engneed" onclick="kpiClick('engneed')">
+      <div class="kpi-label">영문 미발행</div>
+      <div class="kpi-value" id="kpi-engneed-val">—<span class="unit">건</span></div>
+      <div class="kpi-rate bad" id="kpi-engneed-rate">—</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill c4" id="kpi-engneed-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- 상단 툴바 -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="search-inp" placeholder="통합 검색 (제품명·시험코드·시험제목)" oninput="applyFilter()">
+      </div>
+      <select class="filter-select" id="f-year" onchange="applyFilter()">
+        <option value="">전체 연도</option>
+        <option value="2026">2026년</option>
+        <option value="2025">2025년</option>
+        <option value="2024">2024년</option>
+        <option value="2023">2023년</option>
+      </select>
+      <select class="filter-select" id="f-type" onchange="applyFilter()">
+        <option value="">전체 시험종류</option>
+      </select>
+      <select class="filter-select" id="f-eng" onchange="applyFilter()">
+        <option value="">전체 영문상태</option>
+        <option value="발행완료">영문 발행완료</option>
+        <option value="미발행">영문 미발행</option>
+      </select>
+      <button class="btn-refresh" onclick="loadData(true)">↻ 새로고침</button>
+    </div>
+    <button class="btn-copy-excel" id="btn-excel" onclick="copyMainTable(this)">
+      <span>📋</span> 엑셀 복사
+    </button>
+  </div>
+
+  <!-- 효능태그 필터 -->
+  <div class="tag-filter-bar">
+    <span class="tag-filter-label">효능태그</span>
+    <div id="tag-filter-list" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+    <button class="btn-tag-clear" onclick="clearTagFilter()">초기화</button>
+  </div>
+
+  <!-- 결과 테이블 -->
+  <div class="table-wrap">
+    <div class="table-inner">
+      <table id="main-table">
+        <thead>
+          <tr>
+            <th style="width:46px">No.</th>
+            <th class="th-sort" onclick="doSort('year')" style="width:64px">연도<span class="sort-ico"></span></th>
+            <th class="th-sort" onclick="doSort('name')">제품명<span class="sort-ico"></span></th>
+            <th class="th-sort" onclick="doSort('code')" style="width:130px">시험코드<span class="sort-ico"></span></th>
+            <th>시험제목</th>
+            <th class="th-sort" onclick="doSort('type')" style="width:80px">시험종류<span class="sort-ico"></span></th>
+            <th style="min-width:140px">효능태그</th>
+            <th class="th-sort" onclick="doSort('korDate')" style="width:100px">국문발행일<span class="sort-ico"></span></th>
+            <th style="width:130px">링크</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr class="loading-row"><td colspan="9"><span class="spinner"></span>4개 시트 동기화 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span id="row-count">0건 표시</span>
+      <div class="pager" id="pager"></div>
+      <span id="last-sync">마지막 동기화: —</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast-msg" id="toast"></div>
+
+<div class="sec-footer">
+  <strong>MEDIPEEL</strong> Quality Management System &nbsp;|&nbsp; 본 시스템에 포함된 모든 정보는 (주)메디필의 자산이며 기밀 사항입니다.<br>
+  허가 없는 외부 반출·복제·배포를 금지합니다. &copy; 2025 MEDIPEEL. All rights reserved.
+</div>
+
+<script>
+/* ─── 설정 ─── */
+const SHEET_ID = '1sNDUhQusj0Kmjnw2jBMk2tXlQva4ww95_h319SRk8Is';
+const SHEETS = [
+  { gid: '1521662110', year: 2023 },
+  { gid: '652384919',  year: 2024 },
+  { gid: '1835100182', year: 2025 },
+  { gid: '1688076931', year: 2026 }
+];
+const POLL_MS = 60000;
+const PAGE_SIZE = 50;
+
+/* 효능 키워드 사전 (시험제목 텍스트 매칭) */
+const EFFECT_KEYWORDS = ['모공','보습','리프팅','진정','탄력','쿨링','색소','주름','자극','흡수','여드름','민감','미백','윤기','광채','안티에이징','노화지수'];
+
+let RAW = [];
+let FILTERED = [];
+let sortCol = 'korDate', sortDir = 'desc';
+let pollTimer = null;
+let activeTags = new Set();
+let activeKpi = null;
+let currentPage = 1;
+
+/* ─── 시계 ─── */
+function tickClock() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' +
+    String(n.getDate()).padStart(2,'0') + ' ' +
+    String(n.getHours()).padStart(2,'0') + ':' +
+    String(n.getMinutes()).padStart(2,'0') + ':' +
+    String(n.getSeconds()).padStart(2,'0');
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+/* ─── IP ─── */
+fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{document.getElementById('sec-ip-val').textContent=d.ip;}).catch(()=>{document.getElementById('sec-ip-val').textContent='비공개';});
+
+/* ─── CSV 파서 ─── */
+function splitCSVLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"' && line[i+1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') inQ = false;
+      else cur += ch;
+    } else {
+      if (ch === '"') inQ = true;
+      else if (ch === ',') { result.push(cur); cur = ''; }
+      else cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+function parseCSV(text) {
+  /* 멀티라인 셀(따옴표 안의 \n) 처리 — 단순 라인 분리 후 따옴표 균형 체크로 합치기 */
+  const lines = text.split('\n');
+  const merged = [];
+  let buf = '';
+  for (const ln of lines) {
+    buf += (buf ? '\n' : '') + ln;
+    const qcount = (buf.match(/"/g) || []).length;
+    if (qcount % 2 === 0) { merged.push(buf); buf = ''; }
+  }
+  if (buf) merged.push(buf);
+
+  const rows = [];
+  for (let i = 1; i < merged.length; i++) {
+    if (!merged[i].trim()) continue;
+    const c = splitCSVLine(merged[i]);
+    if (c.length < 6) continue;
+    const no = (c[0]||'').trim();
+    if (!no || isNaN(parseInt(no, 10))) continue;
+    rows.push({
+      no: no,
+      name: (c[1]||'').replace(/\s+/g, ' ').trim(),
+      code: (c[2]||'').trim(),
+      title: (c[3]||'').replace(/\s+/g, ' ').replace(/^['"]+|['"]+$/g, '').trim(),
+      korDateRaw: (c[4]||'').trim(),
+      korUrl: (c[5]||'').trim(),
+      engDateRaw: (c[6]||'').trim(),
+      engUrl: (c[7]||'').trim()
+    });
+  }
+  return rows;
+}
+
+/* ─── 발행일 정규화 ─── */
+function normalizeDate(s, fallbackYear) {
+  if (!s) return '';
+  s = s.trim();
+  if (/^\d{6}$/.test(s)) {
+    const yy = parseInt(s.substring(0,2), 10);
+    return (2000 + yy) + '-' + s.substring(2,4) + '-' + s.substring(4,6);
+  }
+  let m = s.match(/^(\d+)\s*월\s*(\d+)\s*일$/);
+  if (m) return fallbackYear + '-' + String(m[1]).padStart(2,'0') + '-' + String(m[2]).padStart(2,'0');
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
+    const [y,mo,d] = s.split('-');
+    return y + '-' + mo.padStart(2,'0') + '-' + d.padStart(2,'0');
+  }
+  return s;
+}
+
+/* ─── 시험종류 추출 (URL 폴더명) ─── */
+function extractType(url) {
+  if (!url) return '기타';
+  try {
+    const dec = decodeURIComponent(url);
+    let m = dec.match(/\d+\.\s*\d+_([^_]+)_/);
+    if (m) {
+      const t = m[1].trim();
+      if (['효능','흡수도','항균','설문','설문인체적용시험'].includes(t)) return t === '설문' ? '설문인체적용시험' : t;
+      return t;
+    }
+  } catch (e) {}
+  return '기타';
+}
+
+/* ─── 효능태그 추출 (시험제목 키워드 매칭) ─── */
+function extractTags(title) {
+  if (!title) return [];
+  const found = [];
+  for (const k of EFFECT_KEYWORDS) {
+    if (title.includes(k)) found.push(k);
+  }
+  return found;
+}
+
+/* ─── 데이터 로딩 ─── */
+async function loadData(showToast) {
+  document.getElementById('sync-dot').classList.remove('err');
+  document.getElementById('sync-label').textContent = '동기화 중...';
+
+  try {
+    const promises = SHEETS.map(s =>
+      fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${s.gid}&t=${Date.now()}`)
+        .then(r => { if (!r.ok) throw new Error('fetch failed: ' + s.year); return r.text(); })
+        .then(csv => ({ year: s.year, rows: parseCSV(csv) }))
+    );
+    const results = await Promise.all(promises);
+
+    const merged = [];
+    for (const { year, rows } of results) {
+      for (const r of rows) {
+        const korDate = normalizeDate(r.korDateRaw, year);
+        const engDate = normalizeDate(r.engDateRaw, year);
+        const type = extractType(r.korUrl);
+        const tags = extractTags(r.title);
+        const engStatus = r.engUrl ? '발행완료' : (engDate ? '발행완료' : '미발행');
+        merged.push({
+          year,
+          no: r.no,
+          name: r.name,
+          code: r.code,
+          title: r.title,
+          type,
+          tags,
+          korDate, korUrl: r.korUrl,
+          engDate, engUrl: r.engUrl,
+          engStatus
+        });
+      }
+    }
+
+    RAW = merged;
+    buildTypeFilter();
+    buildTagFilter();
+    applyFilter();
+
+    const now = new Date();
+    document.getElementById('sync-dot').classList.remove('err');
+    document.getElementById('sync-label').textContent = 'Google Sheets 연결됨';
+    document.getElementById('last-sync').textContent =
+      '마지막 동기화: ' + String(now.getHours()).padStart(2,'0') + ':' +
+      String(now.getMinutes()).padStart(2,'0') + ':' +
+      String(now.getSeconds()).padStart(2,'0');
+    if (showToast) toast(`${RAW.length}건 동기화 완료`);
+  } catch (e) {
+    document.getElementById('sync-dot').classList.add('err');
+    document.getElementById('sync-label').textContent = '연결 오류';
+    toast('데이터 로딩 실패 — 네트워크를 확인하세요.');
+  }
+}
+
+/* ─── 시험종류 필터 옵션 빌드 ─── */
+function buildTypeFilter() {
+  const set = new Set();
+  RAW.forEach(r => { if (r.type) set.add(r.type); });
+  const sel = document.getElementById('f-type');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">전체 시험종류</option>';
+  ['효능','흡수도','항균','설문인체적용시험','기타'].forEach(t => {
+    if (set.has(t)) {
+      const o = document.createElement('option');
+      o.value = t; o.textContent = t;
+      sel.appendChild(o);
+    }
+  });
+  set.forEach(t => {
+    if (!['효능','흡수도','항균','설문인체적용시험','기타'].includes(t)) {
+      const o = document.createElement('option');
+      o.value = t; o.textContent = t;
+      sel.appendChild(o);
+    }
+  });
+  sel.value = cur;
+}
+
+/* ─── 효능태그 필터 (등장 빈도순) ─── */
+function buildTagFilter() {
+  const counts = {};
+  RAW.forEach(r => r.tags.forEach(t => { counts[t] = (counts[t]||0) + 1; }));
+  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+  const wrap = document.getElementById('tag-filter-list');
+  wrap.innerHTML = sorted.map(([t,c]) => {
+    const active = activeTags.has(t) ? 'active' : '';
+    return `<button class="btn-tag ${active}" onclick="toggleTag('${t}')">${t} <span style="opacity:.55; font-weight:500;">${c}</span></button>`;
+  }).join('');
+}
+
+function toggleTag(t) {
+  if (activeTags.has(t)) activeTags.delete(t);
+  else activeTags.add(t);
+  buildTagFilter();
+  applyFilter();
+}
+
+function clearTagFilter() {
+  activeTags.clear();
+  buildTagFilter();
+  applyFilter();
+}
+
+/* ─── KPI 카드 클릭 단축 필터 ─── */
+function kpiClick(kind) {
+  const ye = document.getElementById('f-year');
+  const en = document.getElementById('f-eng');
+  if (activeKpi === kind) {
+    activeKpi = null;
+    ye.value = ''; en.value = '';
+  } else {
+    activeKpi = kind;
+    if (kind === 'total')     { ye.value=''; en.value=''; }
+    if (kind === 'thisyear')  { ye.value = String(new Date().getFullYear()); en.value=''; }
+    if (kind === 'engdone')   { ye.value=''; en.value='발행완료'; }
+    if (kind === 'engneed')   { ye.value=''; en.value='미발행'; }
+  }
+  ['kpi-total','kpi-thisyear','kpi-engdone','kpi-engneed'].forEach(id => {
+    document.getElementById(id).classList.toggle('active', id === 'kpi-' + activeKpi);
+  });
+  applyFilter();
+}
+
+/* ─── 필터 & 정렬 ─── */
+function applyFilter() {
+  const q = document.getElementById('search-inp').value.toLowerCase().trim();
+  const yr = document.getElementById('f-year').value;
+  const tp = document.getElementById('f-type').value;
+  const en = document.getElementById('f-eng').value;
+
+  FILTERED = RAW.filter(r => {
+    if (q) {
+      const hay = (r.name + ' ' + r.code + ' ' + r.title).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (yr && String(r.year) !== yr) return false;
+    if (tp && r.type !== tp) return false;
+    if (en && r.engStatus !== en) return false;
+    if (activeTags.size > 0) {
+      let hit = false;
+      for (const t of activeTags) { if (r.tags.includes(t)) { hit = true; break; } }
+      if (!hit) return false;
+    }
+    return true;
+  });
+
+  doSortInternal();
+  currentPage = 1;
+  updateKPI();
+  renderTable();
+}
+
+function doSort(col) {
+  if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortCol = col; sortDir = col === 'korDate' ? 'desc' : 'asc'; }
+
+  document.querySelectorAll('.th-sort').forEach(th => th.classList.remove('sort-asc','sort-desc'));
+  const map = { year:0, name:1, code:2, type:3, korDate:4 };
+  const ths = document.querySelectorAll('.th-sort');
+  if (ths[map[col]] !== undefined) ths[map[col]].classList.add('sort-' + sortDir);
+
+  doSortInternal();
+  renderTable();
+}
+
+function doSortInternal() {
+  const dir = sortDir === 'desc' ? -1 : 1;
+  FILTERED.sort((a, b) => {
+    let va = a[sortCol], vb = b[sortCol];
+    if (sortCol === 'year') { va = a.year; vb = b.year; }
+    else if (typeof va === 'string') { va = va.toLowerCase(); vb = (vb||'').toLowerCase(); }
+    if (va < vb) return -dir;
+    if (va > vb) return dir;
+    return 0;
+  });
+}
+
+/* ─── KPI 갱신 (필터 결과 기준) ─── */
+function updateKPI() {
+  const total = FILTERED.length;
+  const thisYear = new Date().getFullYear();
+  const yearCnt = FILTERED.filter(r => r.year === thisYear).length;
+  const engDone = FILTERED.filter(r => r.engStatus === '발행완료').length;
+  const engNeed = FILTERED.filter(r => r.engStatus === '미발행').length;
+  const engRate = total ? Math.round(engDone / total * 100) : 0;
+  const needRate = total ? Math.round(engNeed / total * 100) : 0;
+
+  document.getElementById('kpi-total-val').innerHTML = total + '<span class="unit">건</span>';
+  document.getElementById('kpi-total-sub').textContent = '전체 ' + RAW.length + '건 중 표시';
+
+  document.getElementById('kpi-thisyear-val').innerHTML = yearCnt + '<span class="unit">건</span>';
+  document.getElementById('kpi-thisyear-sub').textContent = thisYear + '년 국문 발행 기준';
+
+  document.getElementById('kpi-engdone-val').innerHTML = engDone + '<span class="unit">건</span>';
+  document.getElementById('kpi-engdone-rate').textContent = '발행률 ' + engRate + '%';
+  document.getElementById('kpi-engdone-bar').style.width = engRate + '%';
+
+  document.getElementById('kpi-engneed-val').innerHTML = engNeed + '<span class="unit">건</span>';
+  document.getElementById('kpi-engneed-rate').textContent = '미발행 ' + needRate + '%';
+  document.getElementById('kpi-engneed-bar').style.width = needRate + '%';
+}
+
+/* ─── 테이블 렌더 ─── */
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+  if (!FILTERED.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="no-data">조건에 맞는 보고서가 없습니다.</td></tr>';
+    document.getElementById('row-count').textContent = '0건 표시';
+    document.getElementById('pager').innerHTML = '';
+    return;
+  }
+
+  const totalPages = Math.ceil(FILTERED.length / PAGE_SIZE);
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const end = Math.min(start + PAGE_SIZE, FILTERED.length);
+  const page = FILTERED.slice(start, end);
+
+  let html = '';
+  page.forEach((r, i) => {
+    const titleShort = r.title.length > 90 ? r.title.substring(0, 90) + '…' : r.title;
+    const tagsHtml = r.tags.length
+      ? r.tags.map(t => `<span class="tag-chip">${t}</span>`).join('')
+      : '<span style="color:#c0c8da; font-size:10px;">—</span>';
+    const typeClass = 'type-' + (r.type || '기타');
+    const korBtn = r.korUrl
+      ? `<a class="btn-link kor" href="${r.korUrl}" target="_blank" rel="noopener">국문</a>`
+      : `<span class="btn-link disabled">국문</span>`;
+    const engBtn = r.engUrl
+      ? `<a class="btn-link eng" href="${r.engUrl}" target="_blank" rel="noopener">EN</a>`
+      : `<span class="btn-link disabled">EN</span>`;
+
+    html += `<tr>
+      <td class="td-center" style="color:#8a93b0; font-size:11px;">${start + i + 1}</td>
+      <td class="td-center" style="font-weight:600;">${r.year}</td>
+      <td class="td-pname">${escapeHtml(r.name)}</td>
+      <td class="td-center td-code">${r.code}</td>
+      <td class="td-title" title="${escapeHtml(r.title)}">${escapeHtml(titleShort)}</td>
+      <td class="td-center"><span class="type-badge ${typeClass}">${r.type}</span></td>
+      <td>${tagsHtml}</td>
+      <td class="td-center" style="font-variant-numeric:tabular-nums;">${r.korDate || '—'}</td>
+      <td><div class="link-cell">${korBtn}${engBtn}</div></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+  document.getElementById('row-count').textContent =
+    `${start + 1}–${end} / ${FILTERED.length}건 (전체 ${RAW.length}건)`;
+  renderPager(totalPages);
+}
+
+function renderPager(totalPages) {
+  const wrap = document.getElementById('pager');
+  if (totalPages <= 1) { wrap.innerHTML = ''; return; }
+  let html = '';
+  html += `<button onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹</button>`;
+  const max = Math.min(totalPages, 7);
+  let from = Math.max(1, currentPage - 3);
+  let to = Math.min(totalPages, from + max - 1);
+  from = Math.max(1, to - max + 1);
+  for (let p = from; p <= to; p++) {
+    html += `<button class="${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
+  }
+  html += `<button onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>›</button>`;
+  wrap.innerHTML = html;
+}
+
+function goPage(p) {
+  currentPage = p;
+  renderTable();
+  document.querySelector('.table-inner').scrollTop = 0;
+}
+
+/* ─── 엑셀 복사 ─── */
+function copyMainTable(btn) {
+  const headers = ['No.','연도','제품명','시험코드','시험제목','시험종류','효능태그','국문발행일','국문링크','영문발행일','영문링크','영문상태'];
+  let tsv = headers.join('\t') + '\n';
+  FILTERED.forEach((r, i) => {
+    tsv += [i+1, r.year, r.name, r.code, r.title.replace(/\t/g,' '), r.type, r.tags.join(','), r.korDate, r.korUrl, r.engDate, r.engUrl, r.engStatus].join('\t') + '\n';
+  });
+  navigator.clipboard.writeText(tsv).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '<span>✓</span> 복사 완료';
+    toast(`${FILTERED.length}건 클립보드에 복사됨`);
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '<span>📋</span> 엑셀 복사'; }, 2000);
+  });
+}
+
+/* ─── 유틸 ─── */
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(loadData, POLL_MS);
+}
+
+/* ─── 초기화 ─── */
+loadData();
+startPolling();
+</script>
+</body>
+</html>
