@@ -1381,6 +1381,8 @@ const DEFAULT_ACCOUNTS = [
   { id:'hhs',           pw:'hhs',          name:'황현섭 선임',    initials:'황', role:'user', group:'품질구매팀',   allowedModules: null      },
   { id:'joomi.lee',     pw:'joomi.lee',    name:'이주미 선임',    initials:'이', role:'user', group:'품질구매팀',   allowedModules: null      },
   { id:'yena',          pw:'yena',         name:'유예나 주임',    initials:'유', role:'user', group:'품질구매팀',   allowedModules: null      },
+  // 화면 표시 QMS_01·QMS_04만 접근 허용 → data-module 기준: QMS_01·QMS_03
+  { id:'jiwon.woo',     pw:'jiwon.woo',    name:'우지원',         initials:'우', role:'user', group:'품질구매팀',   allowedModules: ['QMS_01','QMS_03'] },
   // 윈게이트코리아 (QMS_07·QMS_08만 접근 허용 → data-module 기준: QMS_06·QMS_08)
   // 해외영업팀 (QMS_01·QMS_02·QMS_06만 접근 허용)
   { id:'sales01',       pw:'sales01',      name:'해외영업01',     initials:'영', role:'user', group:'해외영업팀',    allowedModules: ['QMS_01','QMS_02','QMS_06','QMS_11'] },
